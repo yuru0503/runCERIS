@@ -1,0 +1,145 @@
+# Package index
+
+## Data Loading & Preparation
+
+Load built-in datasets and prepare data for analysis
+
+- [`load_crop_data()`](load_crop_data.md) : Load a crop dataset
+- [`validate_input_data()`](validate_input_data.md) : Validate input
+  data for CERIS analysis
+- [`prepare_trait_data()`](prepare_trait_data.md) : Prepare trait data
+  for analysis
+- [`compute_env_means()`](compute_env_means.md) : Compute environmental
+  means
+- [`prepare_line_by_env()`](prepare_line_by_env.md) : Prepare
+  line-by-environment matrix
+- [`compile_envirome()`](compile_envirome.md) : Compile Daily
+  Environmental Data into a Single Matrix
+- [`fetch_nasa_power()`](fetch_nasa_power.md) : Fetch Environmental Data
+  from NASA POWER and Compute CERIS Parameters
+- [`prepare_genotype()`](prepare_genotype.md) : Prepare genotype matrix
+  for genomic prediction
+
+## CERIS Search
+
+Exhaustive search for critical environmental windows
+
+- [`ceris_search()`](ceris_search.md) : CERIS Exhaustive Search for
+  Critical Environmental Windows
+- [`ceris_loo_cor()`](ceris_loo_cor.md) : Leave-One-Out Cross-Validated
+  Correlation
+- [`ceris_identify_best()`](ceris_identify_best.md) : Identify the Best
+  Environmental Window from CERIS Results
+- [`compute_window_params()`](compute_window_params.md) : Compute
+  environmental covariate values for a window
+
+## Slope-Intercept
+
+Reaction norm parameter estimation
+
+- [`slope_intercept()`](slope_intercept.md) : Calculate Reaction Norm
+  Slopes and Intercepts
+
+## Joint Regression Analysis
+
+Finlay-Wilkinson regression across environments
+
+- [`jra_model()`](jra_model.md) : Joint Regression Analysis
+
+## Cross-Validation
+
+Leave-one-out and K-fold cross-validation methods
+
+- [`cv_env()`](cv_env.md) : Leave-One-Environment-Out Cross-Validation
+  (1-to-2)
+- [`cv_genotype()`](cv_genotype.md) : K-Fold Genotype Cross-Validation
+  (1-to-3)
+- [`cv_combined()`](cv_combined.md) : Combined Environment and Genotype
+  Cross-Validation (1-to-4)
+- [`loocv()`](loocv.md) : Line-Level Leave-One-Out Cross-Validation
+
+## Genomic Prediction (JGRA)
+
+Joint Genomic Regression Analysis and forecasting
+
+- [`jgra()`](jgra.md) : Joint Genomic Regression Analysis (Reaction Norm
+  Parameters)
+- [`jgra_marker()`](jgra_marker.md) : Joint Genomic Regression Analysis
+  (Marker Effects)
+- [`pred_rrblup()`](pred_rrblup.md) : Genomic Prediction using rrBLUP
+- [`pred_bayesb()`](pred_bayesb.md) : Genomic Prediction using BayesB
+  (BGLR)
+- [`forecast_next_year()`](forecast_next_year.md) : Forecast Phenotypes
+  for New Environments
+
+## Visualization
+
+Plotting functions for CERIS results
+
+- [`plot_ceris_heatmap()`](plot_ceris_heatmap.md) : Plot CERIS
+  Correlation Heatmap
+- [`plot_clustering_heatmap()`](plot_clustering_heatmap.md) : Clustering
+  Heatmap of Environmental Parameters
+- [`plot_cv_results()`](plot_cv_results.md) : Plot Cross-Validation
+  Results
+- [`plot_env_factors()`](plot_env_factors.md) : Plot Environmental
+  Factors Over Time
+- [`plot_env_means()`](plot_env_means.md) : Plot Phenotypes vs
+  Environmental Means
+- [`plot_geo_order()`](plot_geo_order.md) : Plot Environments in
+  Geographic Order
+- [`plot_jra()`](plot_jra.md) : Plot JRA Results
+- [`plot_pairwise_dist()`](plot_pairwise_dist.md) : Plot Pairwise Trait
+  Distributions
+- [`plot_pca_biplot()`](plot_pca_biplot.md) : PCA Biplot of
+  Environmental Parameters
+- [`plot_prediction_result()`](plot_prediction_result.md) : Plot
+  LOOCV/Forecast Prediction Results
+- [`plot_reaction_norm()`](plot_reaction_norm.md) : Plot Reaction Norms
+- [`plot_slope_intercept()`](plot_slope_intercept.md) : Plot Reaction
+  Norm Slopes and Intercepts
+- [`plot_trait_env_param()`](plot_trait_env_param.md) : Plot Trait Mean
+  vs Environmental Parameter
+
+## Color Palettes
+
+Color utilities for CERIS plots
+
+- [`ceris_diverge_palette()`](ceris_diverge_palette.md) : CERIS
+  diverging color palette for correlation heatmaps
+- [`ceris_env_palette()`](ceris_env_palette.md) : Environment color
+  palette
+
+## Shiny Application
+
+Interactive analysis interface
+
+- [`run_app()`](run_app.md) : Launch the CERIS Shiny Application
+
+## Datasets
+
+Built-in crop datasets for examples and tutorials
+
+- [`crop_info`](crop_info.md) : Crop information summary
+- [`sorghum_env_meta`](sorghum_env_meta.md) : Sorghum environment
+  metadata
+- [`sorghum_env_params`](sorghum_env_params.md) : Sorghum daily
+  environmental parameters
+- [`sorghum_genotype`](sorghum_genotype.md) : Sorghum SNP genotype
+  matrix
+- [`sorghum_traits`](sorghum_traits.md) : Sorghum phenotypic trait
+  records
+- [`maize_env_meta`](maize_env_meta.md) : Maize environment metadata
+- [`maize_env_params`](maize_env_params.md) : Maize daily environmental
+  parameters
+- [`maize_genotype`](maize_genotype.md) : Maize SNP genotype matrix
+- [`maize_traits`](maize_traits.md) : Maize phenotypic trait records
+- [`rice_env_meta`](rice_env_meta.md) : Rice environment metadata
+- [`rice_env_params`](rice_env_params.md) : Rice daily environmental
+  parameters
+- [`rice_genotype`](rice_genotype.md) : Rice SNP genotype matrix
+- [`rice_traits`](rice_traits.md) : Rice phenotypic trait records
+- [`oat_env_meta`](oat_env_meta.md) : Oat environment metadata
+- [`oat_env_params`](oat_env_params.md) : Oat daily environmental
+  parameters
+- [`oat_traits`](oat_traits.md) : Oat phenotypic trait records
