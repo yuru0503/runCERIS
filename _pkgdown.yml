@@ -1,0 +1,119 @@
+url: ~
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+
+navbar:
+  structure:
+    left:  [intro, reference, articles]
+    right: [search, github]
+  components:
+    articles:
+      text: Articles
+      menu:
+        - text: "Getting Started"
+          href: articles/getting-started.html
+        - text: "Data Format Reference"
+          href: articles/data-format.html
+        - text: "Data Exploration"
+          href: articles/data-exploration.html
+        - text: "CERIS Search"
+          href: articles/ceris-search.html
+        - text: "Reaction Norms & Slope-Intercept"
+          href: articles/reaction-norms.html
+        - text: "Joint Regression Analysis"
+          href: articles/jra.html
+        - text: "Cross-Validation"
+          href: articles/cross-validation.html
+        - text: "Genomic Prediction (JGRA)"
+          href: articles/genomic-prediction.html
+        - text: "Multi-Crop Examples"
+          href: articles/multi-crop-examples.html
+        - text: "Shiny Application"
+          href: articles/shiny-app.html
+
+reference:
+  - title: "Data Loading & Preparation"
+    desc: "Load built-in datasets and prepare data for analysis"
+    contents:
+      - load_crop_data
+      - validate_input_data
+      - prepare_trait_data
+      - compute_env_means
+      - prepare_line_by_env
+      - compile_envirome
+      - fetch_nasa_power
+      - prepare_genotype
+
+  - title: "CERIS Search"
+    desc: "Exhaustive search for critical environmental windows"
+    contents:
+      - ceris_search
+      - ceris_loo_cor
+      - ceris_identify_best
+      - compute_window_params
+
+  - title: "Slope-Intercept"
+    desc: "Reaction norm parameter estimation"
+    contents:
+      - slope_intercept
+
+  - title: "Joint Regression Analysis"
+    desc: "Finlay-Wilkinson regression across environments"
+    contents:
+      - jra_model
+
+  - title: "Cross-Validation"
+    desc: "Leave-one-out and K-fold cross-validation methods"
+    contents:
+      - cv_env
+      - cv_genotype
+      - cv_combined
+      - loocv
+
+  - title: "Genomic Prediction (JGRA)"
+    desc: "Joint Genomic Regression Analysis and forecasting"
+    contents:
+      - jgra
+      - jgra_marker
+      - pred_rrblup
+      - pred_bayesb
+      - forecast_next_year
+
+  - title: "Visualization"
+    desc: "Plotting functions for CERIS results"
+    contents:
+      - plot_ceris_heatmap
+      - plot_clustering_heatmap
+      - plot_cv_results
+      - plot_env_factors
+      - plot_env_means
+      - plot_geo_order
+      - plot_jra
+      - plot_pairwise_dist
+      - plot_pca_biplot
+      - plot_prediction_result
+      - plot_reaction_norm
+      - plot_slope_intercept
+      - plot_trait_env_param
+
+  - title: "Color Palettes"
+    desc: "Color utilities for CERIS plots"
+    contents:
+      - ceris_diverge_palette
+      - ceris_env_palette
+
+  - title: "Shiny Application"
+    desc: "Interactive analysis interface"
+    contents:
+      - run_app
+
+  - title: "Datasets"
+    desc: "Built-in crop datasets for examples and tutorials"
+    contents:
+      - crop_info
+      - starts_with("sorghum_")
+      - starts_with("maize_")
+      - starts_with("rice_")
+      - starts_with("oat_")

@@ -1,0 +1,40 @@
+Package: runCERIS
+Title: Critical Environmental Regressor through Informed Search
+Version: 0.1.0
+Authors@R: c(
+    person("Yu-Ru", "Chen", email = "yuruchen@iastate.edu",
+           role = c("aut", "cre"))
+  )
+Description: Identifies critical environmental windows and covariates driving
+    genotype-by-environment interaction in multi-environment trials. Includes
+    the CERIS exhaustive search algorithm, Joint Regression Analysis (JRA),
+    Joint Genomic Regression Analysis (JGRA), cross-validation methods, and
+    genomic prediction. Provides a Shiny application for interactive analysis.
+License: GPL-3 + file LICENSE
+Encoding: UTF-8
+LazyData: true
+LazyDataCompression: xz
+Depends: R (>= 4.1.0)
+Imports:
+    ggplot2 (>= 3.4.0),
+    patchwork,
+    colorspace,
+    rrBLUP,
+    shiny (>= 1.7.0),
+    pheatmap,
+    jsonlite,
+    stats,
+    grDevices,
+    utils
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    BGLR,
+    ggforce,
+    bslib,
+    DT,
+    scales
+Config/testthat/edition: 3
+RoxygenNote: 7.3.3
+VignetteBuilder: knitr

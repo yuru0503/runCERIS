@@ -1,0 +1,158 @@
+---
+output: github_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# runCERIS
+
+**Critical Environmental Regressor through Informed Search**
+
+runCERIS identifies critical environmental windows and covariates driving
+genotype-by-environment (GxE) interaction in multi-environment trials. It
+performs an exhaustive search over all possible day-after-planting (DAP)
+windows, correlating environmental parameters with trait means to find the
+time period and covariate most predictive of GxE variation.
+
+This R package was developed by **Dr. Yu-Ru Chen** at Iowa State University,
+adapting and restructuring the original CERIS-JGRA functions created by
+[Dr. Jianming Yu's lab](https://www.agron.iastate.edu/people/yu-jianming/)
+at ISU. The original code is available at
+[github.com/jmyu/CERIS_JGRA](https://github.com/jmyu/CERIS_JGRA). By
+packaging these methods into a documented, tested R package with a Shiny
+interface, runCERIS aims to make GxE environmental window analysis accessible
+to the broader plant breeding community and to help users understand the
+quantitative genetics concepts underlying genotype-by-environment interaction.
+
+## Installation
+
+Install from a local source:
+
+```r
+# Install dependencies
+install.packages(c("ggplot2", "patchwork", "colorspace", "rrBLUP",
+                    "shiny", "pheatmap", "knitr", "rmarkdown"))
+
+# Install runCERIS
+install.packages("path/to/runCERIS", repos = NULL, type = "source")
+
+# Or with devtools
+devtools::install("path/to/runCERIS")
+```
+
+## Quick Start
+
+```{r quick-start, message=FALSE, warning=FALSE}
+library(runCERIS)
+
+# Load sorghum dataset
+d <- load_crop_data("sorghum")
+
+# Prepare trait data (flowering time in DAP)
+exp_trait <- prepare_trait_data(d$traits, "FTdap")
+
+# Compute environmental means and order environments
+env_mean_trait <- compute_env_means(exp_trait, d$env_meta)
+head(env_mean_trait)
+```
+
+```{r ceris-search, message=FALSE, warning=FALSE}
+# Run CERIS search (use max_days = 80 for speed)
+params <- c("DL", "GDD", "PTT", "PTR", "PTS")
+ceris_result <- ceris_search(env_mean_trait, d$env_params, params, max_days = 80)
+
+# Find the best environmental window
+best <- ceris_identify_best(ceris_result, params)
+cat(sprintf("Best parameter: %s (DAP %d-%d, r = %.3f)\n",
+            best$param_name, best$dap_start, best$dap_end, best$correlation))
+```
+
+## Workflow Overview
+
+| Step | Function | Description |
+|------|----------|-------------|
+| 1 | `load_crop_data()` | Load built-in dataset |
+| 2 | `prepare_trait_data()` | Average replicates |
+| 3 | `compute_env_means()` | Environmental means |
+| 4 | `ceris_search()` | Exhaustive window search |
+| 5 | `ceris_identify_best()` | Find best window |
+| 6 | `slope_intercept()` | Reaction norm parameters |
+| 7 | `jra_model()` | Joint regression |
+| 8 | `cv_env()` / `cv_genotype()` | Cross-validation |
+| 9 | `jgra()` / `jgra_marker()` | Genomic prediction |
+
+## Built-in Datasets
+
+```{r datasets}
+data(crop_info)
+crop_info[, c("crop", "n_envs", "traits", "has_genotype")]
+```
+
+## Shiny Application
+
+Launch the interactive analysis interface:
+
+```r
+run_app()
+```
+
+## Vignettes
+
+Detailed tutorials are available as package vignettes:
+
+- [Getting Started](articles/getting-started.html)
+- [Data Exploration](articles/data-exploration.html)
+- [CERIS Search](articles/ceris-search.html)
+- [Reaction Norms](articles/reaction-norms.html)
+- [Joint Regression Analysis](articles/jra.html)
+- [Cross-Validation](articles/cross-validation.html)
+- [Genomic Prediction](articles/genomic-prediction.html)
+- [Multi-Crop Examples](articles/multi-crop-examples.html)
+- [Shiny App Guide](articles/shiny-app.html)
+
+## References
+
+The CERIS-JGRA methodology was developed by the scientists in
+[Dr. Jianming Yu's lab](https://www.agron.iastate.edu/people/yu-jianming/)
+at Iowa State University. Key publications:
+
+- Li, X., Guo, T., Mu, Q., Li, X., & Yu, J. (2018). Genomic and
+  environmental determinants and their interplay underlying phenotypic
+  plasticity. *PNAS*, 115(26), 6679--6684.
+  [doi:10.1073/pnas.1718326115](https://doi.org/10.1073/pnas.1718326115)
+
+- Li, X., Guo, T., Wang, J., Bekele, W. A., Sukumaran, S., ..., & Yu, J.
+  (2021). An integrated framework reinstating the environmental dimension for
+  GWAS and genomic selection in crops. *Molecular Plant*, 14(6), 874--887.
+  [doi:10.1016/j.molp.2021.03.010](https://doi.org/10.1016/j.molp.2021.03.010)
+
+- Mu, Q., Guo, T., Li, X., & Yu, J. (2022). Phenotypic plasticity in plant
+  height shaped by interaction between genetic loci and diurnal temperature
+  range. *New Phytologist*, 233(4), 1768--1779.
+  [doi:10.1111/nph.17904](https://doi.org/10.1111/nph.17904)
+
+- Guo, T., Wei, J., Li, X., & Yu, J. (2024). Environmental context of
+  phenotypic plasticity in flowering time in sorghum and rice. *Journal of
+  Experimental Botany*, 75(3), 1004--1015.
+  [doi:10.1093/jxb/erad398](https://doi.org/10.1093/jxb/erad398)
+
+- Tibbs-Cortes, L. E., Guo, T., Li, X., & Yu, J. (2024). Comprehensive
+  identification of genomic and environmental determinants of phenotypic
+  plasticity in maize. *Genome Research*, 34(8), 1253--1265.
+  [doi:10.1101/gr.279131.124](https://doi.org/10.1101/gr.279131.124)
+
+- Wei, J., Guo, T., Mu, Q., ..., & Yu, J. (2025). Genetic and environmental
+  patterns underlying phenotypic plasticity in flowering time and plant height
+  in sorghum. *Plant, Cell & Environment*, 48(4), 1994--2009.
+  [doi:10.1111/pce.15213](https://doi.org/10.1111/pce.15213)
+
+## License
+
+GPL-3

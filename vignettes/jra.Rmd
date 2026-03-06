@@ -1,0 +1,132 @@
+---
+title: "Joint Regression Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Joint Regression Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+**Joint Regression Analysis (JRA)** is a classical method for characterizing
+genotype-by-environment (GxE) interaction. Originally proposed by Finlay and
+Wilkinson (1963) and refined by Eberhart and Russell (1966), JRA regresses each
+genotype's performance on the environmental mean. The resulting slope and
+intercept summarize how each genotype responds to environmental quality.
+
+CERIS implements JRA through the `jra_model()` function. This vignette
+demonstrates how to fit the model, visualize the results, and interpret the
+output.
+
+## Data Setup
+
+Load the sorghum dataset and prepare the inputs required by `jra_model()`:
+
+```{r load-data}
+library(runCERIS)
+
+d <- load_crop_data("sorghum")
+
+exp_trait <- prepare_trait_data(d$traits, "FTdap")
+env_mean_trait <- compute_env_means(exp_trait, d$env_meta)
+line_by_env <- prepare_line_by_env(exp_trait, env_mean_trait)
+```
+
+The `line_by_env` matrix is a wide-format table with genotypes in rows and
+environments in columns, containing the observed trait values. This is the
+primary input to the JRA model.
+
+```{r line-by-env-preview}
+line_by_env[1:5, 1:5]
+```
+
+## Fitting the JRA Model
+
+The `jra_model()` function fits a simple linear regression for each genotype
+against the environmental means:
+
+```{r jra-fit}
+jra_result <- jra_model(line_by_env, env_mean_trait)
+head(jra_result)
+```
+
+The output data frame contains one row per genotype with the following columns:
+
+| Column | Description |
+|--------|-------------|
+| `line_code` | Genotype identifier |
+| `Intcp` | Raw intercept from the regression |
+| `Intcp_mean` | Intercept adjusted to the mean environmental index |
+| `Slope_mean` | Slope of the regression on the environmental mean |
+| `R2_mean` | Coefficient of determination |
+
+## Summary Statistics
+
+A quick summary of the slope and R-squared distributions reveals the overall
+pattern of GxE interaction in the trial:
+
+```{r jra-summary}
+summary(jra_result$Slope_mean)
+summary(jra_result$R2_mean)
+```
+
+The mean slope across all genotypes should be close to 1.0 (by construction,
+since the environmental index is the mean across genotypes). The spread of
+slopes indicates how much genotypes differ in their responsiveness.
+
+## Visualization
+
+The `plot_jra()` function produces a two-panel display:
+
+- **Left panel**: Regression lines for all genotypes plotted against the
+  environmental mean, with observed data points.
+- **Right panel**: Histogram of R-squared values across genotypes.
+
+```{r jra-plot, fig.width = 7, fig.height = 5}
+plot_jra(exp_trait, env_mean_trait, jra_result, trait = "FTdap")
+```
+
+In the left panel, the spread of regression lines shows the degree of GxE
+interaction. Parallel lines would indicate no crossover interaction (genotype
+rankings remain constant), while crossing lines indicate rank changes across
+environments.
+
+The R-squared histogram shows how well the simple linear model fits each
+genotype. High R-squared values across most genotypes suggest that a linear
+model captures the main pattern of GxE interaction. Genotypes with low
+R-squared may exhibit non-linear responses or be influenced by factors not
+captured by the environmental mean.
+
+## Interpreting Slopes
+
+The slope from JRA has a direct biological interpretation:
+
+| Slope | Interpretation |
+|-------|----------------|
+| > 1 | **Responsive**: The genotype is above average in good environments and below average in poor ones. It exploits favorable conditions but is vulnerable to stress. |
+| ~ 1 | **Average**: The genotype tracks the environmental mean proportionally. Its performance mirrors the trial average. |
+| < 1 | **Stable**: The genotype is less affected by environmental variation. It performs relatively better in poor environments but does not fully capitalize on good ones. |
+
+Breeders targeting broad adaptation prefer genotypes with high intercepts
+(good overall performance) and slopes near 1. Those targeting specific
+environments may select responsive genotypes (slope > 1) for favorable
+conditions or stable genotypes (slope < 1) for stress-prone regions.
+
+## Relationship to CERIS
+
+JRA uses the environmental mean as the environmental index, which is a simple
+and widely used approach. However, the environmental mean conflates all sources
+of environmental variation into a single number. CERIS improves on this by
+identifying a specific environmental parameter and developmental window that
+best explains GxE variation. The slope-intercept analysis in
+`vignette("reaction-norms")` extends JRA by using the CERIS-derived kPara as
+the environmental index, often yielding higher R-squared values and more
+biologically interpretable results.

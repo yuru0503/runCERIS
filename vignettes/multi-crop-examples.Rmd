@@ -1,0 +1,381 @@
+---
+title: "Multi-Crop Examples"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Multi-Crop Examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+CERIS ships with multi-environment trial data for four crops: sorghum, maize,
+rice, and oat. Each crop differs in the number of environments, available
+traits, environmental parameters, and whether genotype marker data is included.
+This vignette demonstrates the full CERIS workflow for maize, rice, and oat,
+highlighting how to adapt the analysis to each crop's characteristics.
+
+The sorghum workflow is covered in detail in earlier vignettes
+(`vignette("getting-started")` through `vignette("genomic-prediction")`).
+Here we focus on the remaining three crops.
+
+## Crop Overview
+
+The `crop_info` dataset provides a quick summary of all available crops:
+
+```{r crop-info}
+library(runCERIS)
+
+crop_info
+```
+
+Key differences across crops:
+
+| Crop | Environments | Traits | Env Parameters | Genotype Data |
+|---|---|---|---|---|
+| Sorghum | 7 | FTdap, FTgdd | DL, GDD, PTT, PTR, PTS | Yes |
+| Maize | 10 | FT, PH | TMAX, TMIN, DL, GDD, PTT, PTR, PTS | Yes |
+| Rice | 9 | FTdap, FTgdd | TMAX, TMIN, DL, GDD, PTT, PTR, PTS | Yes |
+| Oat | 13 | FTdap, PH, GY | TMAX, TMIN, DL, GDD, PTT, PTR, PTD1, PTD2, PTS | No |
+
+Oat is notable for having no genotype data, which limits the analysis to
+phenotypic methods. Oat also includes two additional environmental parameters
+(`PTD1` and `PTD2`) not present in the other crops.
+
+---
+
+## Maize: Full Workflow
+
+Maize provides 10 environments, two traits (flowering time `FT` and plant
+height `PH`), seven environmental parameters, and genotype marker data. We
+demonstrate the complete pipeline using flowering time.
+
+### Data Loading and Preparation
+
+```{r maize-load}
+maize <- load_crop_data("maize")
+names(maize)
+
+str(maize$traits)
+str(maize$env_params)
+```
+
+Prepare the trait data and compute environmental means:
+
+```{r maize-prepare}
+maize_exp <- prepare_trait_data(maize$traits, "FT")
+maize_env <- compute_env_means(maize_exp, maize$env_meta)
+
+head(maize_exp)
+maize_env
+```
+
+### CERIS Search
+
+Run the exhaustive window search over all seven environmental parameters. With
+10 environments, the search is somewhat more computationally intensive than
+sorghum's 7 environments:
+
+```{r maize-search, cache = TRUE}
+maize_params <- c("TMAX", "TMIN", "DL", "GDD", "PTT", "PTR", "PTS")
+
+maize_ceris <- ceris_search(
+  env_mean_trait = maize_env,
+  env_params     = maize$env_params,
+  params         = maize_params,
+  max_days       = 80,
+  loo            = FALSE,
+  progress       = NULL
+)
+```
+
+### Identifying the Best Window
+
+```{r maize-best}
+maize_best <- ceris_identify_best(maize_ceris, params = maize_params)
+maize_best
+```
+
+### Heatmap Visualization
+
+The heatmap reveals the correlation landscape across all window-parameter
+combinations. Look for a well-defined peak in the heatmap --- this indicates a
+clear critical window.
+
+```{r maize-heatmap, fig.width = 8, fig.height = 6}
+plot_ceris_heatmap(
+  ceris_result = maize_ceris,
+  params       = maize_params,
+  max_days     = 80
+)
+```
+
+### Computing Window Parameters
+
+```{r maize-kpara}
+maize_env <- compute_window_params(
+  env_mean_trait = maize_env,
+  env_params     = maize$env_params,
+  dap_start      = maize_best$dap_start,
+  dap_end        = maize_best$dap_end,
+  params         = maize_best$param_name
+)
+head(maize_env)
+```
+
+### Joint Regression Analysis
+
+The JRA model regresses genotype performance on the environmental mean and the
+CERIS-derived kPara. This quantifies how much of the GxE variation is explained
+by the identified environmental window:
+
+```{r maize-jra}
+maize_line_env <- prepare_line_by_env(maize_exp, maize_env)
+
+maize_jra <- jra_model(maize_line_env, maize_env)
+maize_jra
+```
+
+### Cross-Validation
+
+Environment-level cross-validation evaluates prediction accuracy when one
+environment is held out at a time:
+
+```{r maize-cv}
+maize_cv <- cv_env(maize_env, maize_exp)
+maize_cv
+```
+
+This gives a realistic estimate of how well the model would predict performance
+in an untested environment, which is the primary use case in breeding programs.
+
+---
+
+## Rice: Abbreviated Workflow
+
+Rice provides 9 environments, two traits (`FTdap` and `FTgdd`), and the same
+seven environmental parameters as maize. We demonstrate a streamlined workflow
+focusing on the CERIS search and visualization.
+
+### Data Preparation
+
+```{r rice-load}
+rice <- load_crop_data("rice")
+
+rice_exp <- prepare_trait_data(rice$traits, "FTdap")
+rice_env <- compute_env_means(rice_exp, rice$env_meta)
+rice_env
+```
+
+### CERIS Search
+
+```{r rice-search, cache = TRUE}
+rice_params <- c("TMAX", "TMIN", "DL", "GDD", "PTT", "PTR", "PTS")
+
+rice_ceris <- ceris_search(
+  env_mean_trait = rice_env,
+  env_params     = rice$env_params,
+  params         = rice_params,
+  max_days       = 80,
+  loo            = FALSE,
+  progress       = NULL
+)
+```
+
+### Best Window and Heatmap
+
+```{r rice-best}
+rice_best <- ceris_identify_best(rice_ceris, params = rice_params)
+rice_best
+```
+
+```{r rice-heatmap, fig.width = 8, fig.height = 6}
+plot_ceris_heatmap(
+  ceris_result = rice_ceris,
+  params       = rice_params,
+  max_days     = 80
+)
+```
+
+Rice is a short-day plant, so day length (`DL`) and photoperiod-derived
+parameters (`PTT`, `PTR`, `PTS`) are often the strongest predictors of
+flowering time variation across environments. Compare the heatmap pattern with
+maize to see how the critical window and parameter differ between crops.
+
+### Computing Window Parameters
+
+```{r rice-kpara}
+rice_env <- compute_window_params(
+  env_mean_trait = rice_env,
+  env_params     = rice$env_params,
+  dap_start      = rice_best$dap_start,
+  dap_end        = rice_best$dap_end,
+  params         = rice_best$param_name
+)
+head(rice_env)
+```
+
+Rice has genotype marker data available, so the full JGRA pipeline from
+`vignette("genomic-prediction")` can be applied. The workflow is identical
+to sorghum --- prepare the wide-format phenotype matrix, construct the genotype
+data frame, and call `jgra()` or `jgra_marker()`.
+
+---
+
+## Oat: Analysis Without Genotype Data
+
+Oat is the largest dataset with 13 environments, three traits (`FTdap`, `PH`,
+`GY`), and nine environmental parameters including the unique `PTD1` and `PTD2`
+parameters. Crucially, oat has **no genotype marker data**, which restricts the
+analysis to phenotypic methods.
+
+### Data Loading
+
+```{r oat-load}
+oat <- load_crop_data("oat")
+names(oat)
+
+# Confirm no genotype data
+is.null(oat$genotype)
+
+str(oat$traits)
+str(oat$env_params)
+```
+
+### Data Preparation
+
+We use flowering time in days after planting (`FTdap`) as the trait of
+interest:
+
+```{r oat-prepare}
+oat_exp <- prepare_trait_data(oat$traits, "FTdap")
+oat_env <- compute_env_means(oat_exp, oat$env_meta)
+oat_env
+```
+
+### CERIS Search with Extended Parameters
+
+Oat includes nine environmental parameters --- two more than the other crops.
+The additional parameters `PTD1` and `PTD2` represent alternative
+photothermal-day formulations that may capture different aspects of the
+photoperiod-temperature interaction:
+
+```{r oat-search, cache = TRUE}
+oat_params <- c("TMAX", "TMIN", "DL", "GDD", "PTT", "PTR", "PTD1", "PTD2", "PTS")
+
+oat_ceris <- ceris_search(
+  env_mean_trait = oat_env,
+  env_params     = oat$env_params,
+  params         = oat_params,
+  max_days       = 80,
+  loo            = FALSE,
+  progress       = NULL
+)
+```
+
+### Best Window and Visualization
+
+```{r oat-best}
+oat_best <- ceris_identify_best(oat_ceris, params = oat_params)
+oat_best
+```
+
+```{r oat-heatmap, fig.width = 8, fig.height = 6}
+plot_ceris_heatmap(
+  ceris_result = oat_ceris,
+  params       = oat_params,
+  max_days     = 80
+)
+```
+
+With 13 environments, oat provides the most statistical power for the CERIS
+search among the four built-in datasets. The heatmap may reveal multiple
+competing windows or parameters, particularly among the correlated
+photoperiod-derived parameters. The `ceris_identify_best()` function selects
+the single best combination, but inspecting the heatmap visually can reveal
+near-optimal alternatives worth investigating.
+
+### Cross-Validation (Phenotypic Only)
+
+Since oat has no genotype data, genomic prediction methods (`jgra()`,
+`jgra_marker()`) cannot be applied. The analysis is restricted to phenotypic
+cross-validation:
+
+```{r oat-kpara}
+oat_env <- compute_window_params(
+  env_mean_trait = oat_env,
+  env_params     = oat$env_params,
+  dap_start      = oat_best$dap_start,
+  dap_end        = oat_best$dap_end,
+  params         = oat_best$param_name
+)
+```
+
+```{r oat-cv}
+oat_cv <- cv_env(oat_env, oat_exp)
+oat_cv
+```
+
+Environment-level cross-validation remains fully functional without marker
+data. This evaluates how well the CERIS-identified environmental parameter
+predicts trait variation in held-out environments based on phenotypic data
+alone.
+
+For oat, you can also explore the other available traits (`PH` for plant
+height, `GY` for grain yield) by repeating the pipeline with a different
+`trait` argument in `prepare_trait_data()`. Different traits may have different
+critical windows and environmental drivers.
+
+---
+
+## Cross-Crop Comparison
+
+The four crops illustrate the flexibility of the CERIS framework:
+
+| Aspect | Sorghum | Maize | Rice | Oat |
+|---|---|---|---|---|
+| Best parameter | Varies by run | Varies by run | Varies by run | Varies by run |
+| Photoperiod sensitive | Yes (short-day) | Less so | Yes (short-day) | Yes (long-day) |
+| Genomic prediction | Full JGRA | Full JGRA | Full JGRA | Not available |
+| Number of parameters | 5 | 7 | 7 | 9 |
+| Unique features | Baseline dataset | Temperature params | Temperature params | PTD1, PTD2; no genotype |
+
+Key observations when comparing across crops:
+
+1. **Parameter set size matters.** More parameters mean a larger search space.
+   The oat analysis evaluates 9 parameters compared to sorghum's 5, which
+   increases the risk of spurious associations but also provides a richer
+   characterization of the environment.
+
+2. **Photoperiod sensitivity varies.** Sorghum and rice are short-day plants
+   where photoperiod-derived parameters often dominate. Maize flowering is less
+   photoperiod-sensitive, so temperature-related parameters may emerge as
+   stronger predictors. Oat is a long-day plant with yet another pattern.
+
+3. **Genotype data enables prediction.** The three crops with marker data
+   support the full JGRA pipeline for genomic prediction. Without markers
+   (oat), the analysis focuses on understanding GxE patterns through
+   environmental characterization and phenotypic cross-validation.
+
+## Summary
+
+This vignette demonstrated CERIS workflows for three crops beyond sorghum:
+
+- **Maize**: Full pipeline including JRA and cross-validation, with seven
+  environmental parameters and genotype data.
+- **Rice**: Streamlined search and visualization, with the same parameter set
+  as maize and potential for full JGRA analysis.
+- **Oat**: Extended parameter set (nine parameters including PTD1 and PTD2)
+  but no genotype data, restricting analysis to phenotypic methods.
+
+The CERIS search framework is crop-agnostic --- the same functions work across
+all crops. The key decisions are which traits and parameters to include, and
+whether genotype data is available for genomic prediction. Use `crop_info` to
+quickly assess what is available for each built-in dataset.

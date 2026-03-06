@@ -1,0 +1,10 @@
+/doc/
+/Meta/
+docs/
+*.Rproj.user
+.Rhistory
+.RData
+.Rproj.user
+README.html
+inst/doc
+vignettes/*_cache/

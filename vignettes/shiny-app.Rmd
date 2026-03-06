@@ -1,0 +1,428 @@
+---
+title: "Shiny Application Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Shiny Application Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+## Overview
+
+CERIS includes an interactive Shiny application that provides a point-and-click
+interface for the entire analysis pipeline. The app is designed for researchers
+who prefer a graphical workflow or who want to quickly explore results before
+writing analysis scripts. Every analysis available in the app can also be
+performed programmatically using the functions documented in the other
+vignettes.
+
+## Launching the App
+
+Start the Shiny application with a single function call:
+
+```{r launch}
+library(runCERIS)
+
+run_app()
+```
+
+The app opens in your default web browser. All computation runs locally in your
+R session.
+
+## Tab-by-Tab Walkthrough
+
+The application is organized into eight tabs, each corresponding to a stage of
+the CERIS analysis workflow.
+
+### 1. Data Tab
+
+The Data tab is the entry point for every analysis. You can either select a
+built-in crop dataset or upload your own files.
+
+**Using built-in data:**
+
+Select a crop from the dropdown menu (sorghum, maize, rice, or oat). The data
+loads immediately and a summary of the dataset is displayed, including the
+number of environments, lines, traits, and available environmental parameters.
+
+**Uploading custom data:**
+
+Upload four CSV files corresponding to the four data components. Each file must
+follow the column structure described below (see [Custom Data Format
+Requirements](#custom-data-format-requirements)). After uploading, the app
+validates the data and reports any formatting issues.
+
+Once data is loaded, select the trait of interest from the trait dropdown. This
+selection propagates to all downstream tabs.
+
+### 2. Explore Tab
+
+The Explore tab provides interactive visualizations for understanding the data
+before running the CERIS search:
+
+```{r explore-example}
+# These visualizations are available in the Explore tab:
+# - Geographic ordering of environments
+# - Trait means across environments (Finlay-Wilkinson style)
+# - Daily environmental factor profiles
+# - PCA biplot of environments
+# - Hierarchical clustering heatmap
+```
+
+- **Geographic Order**: Displays boxplots of the selected trait for each
+  environment, ordered by latitude or environmental mean. This reveals spatial
+  gradients in trait performance.
+
+- **Environment Means**: Shows individual genotype performance lines plotted
+  against the environmental mean. Crossing lines indicate GxE interactions.
+
+- **Environmental Factors**: Time-series plots of daily environmental
+  parameters across all environments. Use these to identify parameters that
+  show strong separation among environments.
+
+- **PCA Biplot**: Projects environments into a reduced space based on their
+  environmental parameter profiles. Parameter arrows indicate which factors
+  drive the separation.
+
+- **Clustering Heatmap**: Groups environments by similarity in their
+  environmental profiles. Compare these clusters with the trait-based groupings
+  to assess whether environmental similarity explains GxE patterns.
+
+All plots can be customized with color palettes and exported as PNG or PDF
+files.
+
+### 3. CERIS Tab
+
+The CERIS tab runs the core exhaustive window search:
+
+```{r ceris-example}
+# In the CERIS tab:
+# 1. Select environmental parameters to include in the search
+# 2. Set max_days (maximum window endpoint)
+# 3. Optionally enable leave-one-out mode
+# 4. Click "Run Search"
+# 5. View the heatmap and best window results
+```
+
+- **Parameter Selection**: Check the parameters to include in the search. All
+  available parameters are listed based on the loaded dataset.
+
+- **Max Days**: Set the maximum number of days after planting to consider. A
+  value of 80 is a reasonable default for most crops.
+
+- **Leave-One-Out**: When enabled, the search performs leave-one-environment-out
+  cross-validation at each window, which provides a more robust but slower
+  assessment of window quality.
+
+- **Run Search**: Initiates the exhaustive search. A progress indicator shows
+  the current parameter being evaluated. Computation time depends on the number
+  of parameters, environments, and the max_days setting.
+
+- **Heatmap**: After the search completes, an interactive heatmap displays the
+  correlation (R-squared) between the windowed environmental parameter and the
+  trait across all start-day and end-day combinations. The best window is
+  highlighted.
+
+- **Best Window**: A summary panel shows the identified best parameter, window
+  start and end days, and the corresponding R-squared value. Click "Apply" to
+  pass these results to downstream tabs.
+
+### 4. Reaction Norm Tab
+
+The Reaction Norm tab visualizes how genotype performance changes across the
+environmental gradient:
+
+```{r rn-example}
+# In the Reaction Norm tab:
+# - View reaction norms against environmental mean and kPara
+# - Explore slope-intercept analysis
+# - Identify stable vs. responsive genotypes
+```
+
+- **Reaction Norm Plots**: Four-panel display showing genotype-level reaction
+  norms against both the environmental mean and the CERIS-identified kPara.
+  Lines connecting a genotype's performance across environments reveal its
+  sensitivity pattern.
+
+- **Slope-Intercept Analysis**: Scatter plot of genotype slopes (environmental
+  sensitivity) versus intercepts (baseline performance). Genotypes are
+  categorized as stable (slope < 1), average (slope near 1), or responsive
+  (slope > 1).
+
+- **Pairwise Distances**: Characterizes the similarity structure among
+  environments and among genotypes based on their trait values.
+
+### 5. JRA Tab
+
+The JRA (Joint Regression Analysis) tab fits the classical joint regression
+model:
+
+```{r jra-example}
+# In the JRA tab:
+# - View joint regression results
+# - Compare R-squared for mean-based vs. kPara-based regression
+# - Examine genotype-specific regression lines
+```
+
+- **Model Summary**: Displays the overall R-squared and residual statistics for
+  the joint regression model using both the environmental mean and kPara as the
+  environmental index.
+
+- **Regression Lines**: Individual genotype regression lines overlaid on the
+  observed data. The slope and intercept for each genotype are reported in a
+  companion table.
+
+### 6. CV Tab
+
+The CV (Cross-Validation) tab evaluates prediction robustness:
+
+```{r cv-example}
+# In the CV tab:
+# - Run environment leave-one-out cross-validation (cv_env)
+# - Run observation-level LOOCV (loocv)
+# - Compare prediction accuracy metrics
+```
+
+- **Environment CV**: Holds out one environment at a time and predicts its
+  trait values from the remaining environments. Reports the correlation between
+  observed and predicted values.
+
+- **LOOCV**: Holds out one observation at a time for a finer-grained
+  assessment. This is more computationally intensive but provides a
+  per-observation prediction accuracy estimate.
+
+- **Results Table**: Side-by-side comparison of accuracy metrics from both
+  cross-validation approaches.
+
+### 7. JGRA Tab
+
+The JGRA (Joint Genomic Regression Analysis) tab integrates genotype marker
+data with the CERIS environmental characterization. This tab is only available
+when genotype data is present.
+
+```{r jgra-example}
+# In the JGRA tab:
+# - Select method: RM.E (env LOO), RM.G (genotype CV), RM.GE (combined)
+# - Choose between reaction norm (jgra) and marker effect (jgra_marker) models
+# - Set fold and reshuffle parameters
+# - View prediction accuracy and observed-vs-predicted plots
+# - Run forecast_next_year with custom train/test splits
+```
+
+- **Method Selection**: Choose the cross-validation scheme. `RM.E` evaluates
+  environment-level prediction, `RM.G` evaluates genotype-level prediction, and
+  `RM.GE` evaluates both simultaneously.
+
+- **Model Type**: Toggle between the reaction norm approach (`jgra`) and the
+  marker effect approach (`jgra_marker`).
+
+- **Fold and Reshuffle**: Set the number of cross-validation folds and
+  reshuffles. Higher values give more stable estimates but increase computation
+  time.
+
+- **Forecast**: Define training and test environment sets for
+  `forecast_next_year()`. Drag environments between the training and test
+  panels, then run the forecast to see predicted versus observed values.
+
+- **Results**: Displays `r_within`, `r_across`, and a scatter plot of observed
+  versus predicted values colored by environment.
+
+### 8. Visualization Tab
+
+The Visualization tab provides tools for exporting and customizing plots:
+
+```{r viz-example}
+# In the Visualization tab:
+# - Select any plot generated in previous tabs
+# - Customize colors, labels, and dimensions
+# - Export as PNG, PDF, or SVG
+# - Download result tables as CSV
+```
+
+- **Plot Gallery**: Thumbnails of all plots generated during the session. Click
+  to enlarge and customize.
+
+- **Export Options**: Choose output format (PNG, PDF, SVG), resolution, and
+  dimensions. Click "Download" to save.
+
+- **Table Export**: Download any results table (CERIS search results,
+  slope-intercept values, cross-validation metrics, JGRA predictions) as a CSV
+  file for further analysis in other software.
+
+---
+
+## Custom Data Format Requirements
+
+When uploading your own data, each CSV file must follow a specific column
+structure. The app validates all files on upload and reports any issues.
+
+### Traits File
+
+The traits file contains phenotypic observations at the plot level.
+
+| Column | Type | Required | Description |
+|---|---|---|---|
+| `line_code` | character | Yes | Genotype identifier |
+| `env_code` | character | Yes | Environment identifier |
+| *trait columns* | numeric | Yes (at least one) | One or more trait measurements (e.g., `FT`, `PH`, `GY`) |
+| `pop_code` | character | No | Population identifier (optional grouping variable) |
+| `env_note` | character | No | Short description of the environment |
+
+Example:
+
+```{r traits-format}
+# line_code, env_code, FTdap, FTgdd, env_note
+# "LINE001", "ENV01", 65.2, 850.1, "Lubbock 2018"
+# "LINE001", "ENV02", 72.4, 920.3, "College Station 2018"
+# "LINE002", "ENV01", 63.8, 835.6, "Lubbock 2018"
+```
+
+### Environment Metadata File
+
+The environment metadata file describes each trial environment.
+
+| Column | Type | Required | Description |
+|---|---|---|---|
+| `env_code` | character | Yes | Environment identifier (must match traits file) |
+| `lat` | numeric | Yes | Latitude of trial site |
+| `lon` | numeric | Yes | Longitude of trial site |
+| `PlantingDate` | character/Date | Yes | Planting date (YYYY-MM-DD format) |
+| `Year` | integer | No | Trial year |
+| `Location` | character | No | Location name |
+
+Example:
+
+```{r env-meta-format}
+# env_code, lat, lon, PlantingDate, Year, Location
+# "ENV01", 33.57, -101.85, "2018-05-15", 2018, "Lubbock"
+# "ENV02", 30.63, -96.33, "2018-04-20", 2018, "College Station"
+```
+
+### Environmental Parameters File
+
+The environmental parameters file contains daily environmental covariates for
+each environment.
+
+| Column | Type | Required | Description |
+|---|---|---|---|
+| `env_code` | character | Yes | Environment identifier (must match traits file) |
+| `DAP` | integer | Yes | Days after planting (1, 2, 3, ...) |
+| *parameter columns* | numeric | Yes (at least one) | Daily environmental measurements |
+
+Common parameter columns include:
+
+| Parameter | Description |
+|---|---|
+| `TMAX` | Daily maximum temperature |
+| `TMIN` | Daily minimum temperature |
+| `DL` | Day length (photoperiod in hours) |
+| `GDD` | Growing degree days |
+| `PTT` | Photothermal time |
+| `PTR` | Photothermal ratio |
+| `PTS` | Photothermal sum |
+| `PTD1` | Photothermal day formulation 1 |
+| `PTD2` | Photothermal day formulation 2 |
+
+The file must contain daily records for every environment, starting from DAP 1.
+The maximum DAP should be at least as large as the `max_days` setting used in
+the CERIS search.
+
+Example:
+
+```{r env-params-format}
+# env_code, DAP, DL, GDD, PTT, PTR, PTS
+# "ENV01", 1, 13.5, 15.2, 205.2, 1.13, 17.18
+# "ENV01", 2, 13.5, 16.8, 226.8, 1.25, 21.00
+# "ENV02", 1, 13.2, 18.1, 238.9, 1.37, 24.80
+```
+
+### Genotype File (Optional)
+
+The genotype file contains marker scores for each genotype. If omitted, the
+JGRA tab will be disabled.
+
+| Column | Type | Required | Description |
+|---|---|---|---|
+| `line_code` | character | Yes | Genotype identifier (must match traits file) |
+| *marker columns* | numeric | Yes | One column per marker, values typically coded as -1, 0, 1 |
+
+Row names should correspond to `line_code` values in the traits file. The
+marker values are typically coded as:
+
+- `-1`: Homozygous for the reference allele
+- `0`: Heterozygous
+- `1`: Homozygous for the alternative allele
+
+Example:
+
+```{r genotype-format}
+# line_code, MKR001, MKR002, MKR003, ...
+# "LINE001", -1, 0, 1, ...
+# "LINE002", 1, 1, -1, ...
+# "LINE003", 0, -1, 0, ...
+```
+
+### Data Validation Checklist
+
+Before uploading, verify that your data meets these requirements:
+
+1. All `env_code` values in the traits file must appear in both the environment
+   metadata and environmental parameters files.
+2. All `line_code` values must be consistent across the traits and genotype
+   files (if genotype data is provided).
+3. The environmental parameters file must have continuous DAP values starting
+   from 1 for each environment.
+4. No missing values are allowed in the `env_code`, `line_code`, or `DAP`
+   columns. Missing trait or parameter values should be coded as `NA`.
+5. Column names must match exactly (case-sensitive).
+
+You can also validate your data programmatically before launching the app:
+
+```{r validate}
+validate_input_data(
+  traits     = my_traits,
+  env_meta   = my_env_meta,
+  env_params = my_env_params,
+  genotype   = my_genotype  # omit if not available
+)
+```
+
+## Tips for Effective Use
+
+- **Start with a built-in dataset** to familiarize yourself with the workflow
+  before uploading custom data.
+- **Use the Explore tab** before running the CERIS search. Understanding the
+  structure of your data helps interpret the search results.
+- **Set max_days conservatively** (e.g., 80) for initial exploration. You can
+  increase it later if the best window falls near the boundary.
+- **Enable leave-one-out** in the CERIS tab for a robust assessment, but be
+  prepared for longer computation times.
+- **Export results** from the Visualization tab for publication-quality figures
+  and for further analysis in R or other software.
+
+## Summary
+
+The CERIS Shiny application provides an interactive interface for the complete
+analysis pipeline:
+
+1. **Data**: Load built-in or custom datasets.
+2. **Explore**: Visualize geographic patterns, trait distributions, and
+   environmental profiles.
+3. **CERIS**: Run the exhaustive window search and identify the critical
+   environmental factor.
+4. **Reaction Norm**: Examine genotype-specific environmental responses.
+5. **JRA**: Fit joint regression models.
+6. **CV**: Evaluate prediction accuracy through cross-validation.
+7. **JGRA**: Perform genomic prediction (when genotype data is available).
+8. **Visualization**: Export plots and result tables.
+
+For reproducible analyses and scripting, all app functionality is available
+through the CERIS R functions documented in the package vignettes.

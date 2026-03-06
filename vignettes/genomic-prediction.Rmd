@@ -1,0 +1,346 @@
+---
+title: "Genomic Prediction (JGRA)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Genomic Prediction (JGRA)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+Genomic prediction integrates marker data with environmental covariates to
+predict genotype performance in untested environments. CERIS provides two
+complementary approaches through the **JGRA** (Joint Genomic Regression
+Analysis) framework:
+
+1. **Reaction norm approach** (`jgra()`): Models genotype-by-environment
+   interaction as a function of genomic breeding values and their interaction
+   with an environmental covariate. The reaction norm captures how each
+   genotype's performance changes along the environmental gradient identified
+   by CERIS.
+
+2. **Marker effect approach** (`jgra_marker()`): Estimates marker-specific
+   sensitivity to the environmental covariate. Rather than summarizing genomic
+   information into a single breeding value, this approach models individual
+   marker effects and their interactions with the environment.
+
+Both methods leverage the CERIS-identified critical environmental parameter
+(kPara) to define the environmental gradient, replacing the traditional
+environmental mean with a biologically interpretable covariate.
+
+This vignette demonstrates how to:
+
+- Prepare the required inputs for JGRA from a standard CERIS pipeline.
+- Run genomic prediction using the reaction norm and marker effect approaches.
+- Evaluate prediction accuracy with different cross-validation schemes.
+- Forecast performance in new environments using `forecast_next_year()`.
+
+## Data Setup
+
+Load the sorghum dataset and run the standard CERIS pipeline through
+`compute_window_params()`. This produces the kPara column needed for JGRA.
+
+```{r load-data}
+library(runCERIS)
+
+d <- load_crop_data("sorghum")
+
+exp_trait <- prepare_trait_data(d$traits, "FTdap")
+env_mean_trait <- compute_env_means(exp_trait, d$env_meta)
+```
+
+Run the CERIS exhaustive search to identify the best environmental window:
+
+```{r ceris-search, cache = TRUE}
+params <- c("DL", "GDD", "PTT", "PTR", "PTS")
+
+ceris_result <- ceris_search(
+  env_mean_trait = env_mean_trait,
+  env_params     = d$env_params,
+  params         = params,
+  max_days       = 80,
+  loo            = FALSE,
+  progress       = NULL
+)
+
+best <- ceris_identify_best(ceris_result, params = params)
+best
+```
+
+Compute the window-summarized environmental parameter for each environment:
+
+```{r compute-kpara}
+env_mean_trait <- compute_window_params(
+  env_mean_trait = env_mean_trait,
+  env_params     = d$env_params,
+  dap_start      = best$dap_start,
+  dap_end        = best$dap_end,
+  params         = best$param_name
+)
+head(env_mean_trait)
+```
+
+## Preparing JGRA Inputs
+
+The `jgra()` and `jgra_marker()` functions require three primary inputs:
+
+- **pheno**: A wide-format data frame with `line_code` in the first column
+  and one column per environment containing trait values. This is the output
+  of `prepare_line_by_env()`.
+- **geno**: A data frame with `line_code` as the first column followed by
+  marker columns. This must be constructed from the genotype matrix.
+- **envir**: A data frame with `env_code` and the environmental parameter
+  column to use as the covariate.
+
+```{r prepare-inputs}
+# Wide-format phenotype matrix
+pheno <- prepare_line_by_env(exp_trait, env_mean_trait)
+head(pheno[, 1:4])
+
+# Genotype data frame with line_code as first column
+geno_df <- data.frame(
+  line_code = rownames(d$genotype),
+  d$genotype,
+  check.names = FALSE
+)
+geno_df[1:5, 1:5]
+
+# Environmental covariate
+envir <- env_mean_trait[, c("env_code", "kPara")]
+envir
+```
+
+The `envir` data frame links each environment to its kPara value --- the
+CERIS-identified environmental covariate summarized over the critical window.
+This replaces the traditional environmental mean with a parameter that has a
+direct biological interpretation (e.g., cumulative photoperiod during the
+sensitive developmental period).
+
+## Reaction Norm Approach
+
+The `jgra()` function fits a reaction norm model that decomposes genotype
+performance into a main genetic effect (breeding value) and a genotype-specific
+sensitivity to the environmental covariate. The `method` argument controls the
+cross-validation scheme:
+
+- `"RM.E"`: Leave-one-environment-out --- predicts performance in environments
+  excluded from training.
+- `"RM.G"`: K-fold genotype cross-validation --- predicts performance of
+  genotypes excluded from training.
+- `"RM.GE"`: Combined --- simultaneously excludes genotypes and environments.
+
+We start with environment leave-one-out (`RM.E`), using `fold = 5` and
+`reshuffle = 2` for faster computation in this vignette:
+
+```{r jgra-rme, cache = TRUE}
+jgra_result <- jgra(
+  pheno    = pheno,
+  geno     = geno_df,
+  envir    = envir,
+  enp      = "kPara",
+  env_meta = d$env_meta,
+  method   = "RM.E",
+  fold     = 5,
+  reshuffle = 2,
+  progress = NULL
+)
+```
+
+The result contains prediction accuracy metrics:
+
+```{r jgra-rme-results}
+# Within-environment correlation
+jgra_result$r_within
+
+# Across-environment correlation
+jgra_result$r_across
+
+# Prediction data frame
+head(jgra_result$predictions)
+```
+
+The `r_within` value measures how well the model predicts genotype rankings
+within each environment, while `r_across` captures prediction accuracy across
+all observations. The `predictions` data frame contains observed (`obs`) and
+predicted (`pre`) values along with environment identifiers.
+
+## Marker Effect Approach
+
+The `jgra_marker()` function uses the same interface but estimates
+marker-specific environmental sensitivities rather than summarizing genomic
+information into a single breeding value. This approach can capture more
+complex patterns of GxE when individual markers have differential sensitivity
+to the environmental covariate:
+
+```{r jgra-marker, eval = FALSE}
+marker_result <- jgra_marker(
+  pheno    = pheno,
+  geno     = geno_df,
+  envir    = envir,
+  enp      = "kPara",
+  env_meta = d$env_meta,
+  method   = "RM.E",
+  fold     = 5,
+  reshuffle = 2,
+  progress = NULL
+)
+```
+
+Compare the marker effect results with the reaction norm approach:
+
+```{r compare-methods, eval = FALSE}
+comparison <- data.frame(
+  Method    = c("Reaction Norm (jgra)", "Marker Effects (jgra_marker)"),
+  r_within  = c(jgra_result$r_within, marker_result$r_within),
+  r_across  = c(jgra_result$r_across, marker_result$r_across)
+)
+comparison
+```
+
+Note: `jgra_marker()` requires datasets with sufficient genotype matrix
+dimensions. The sorghum example dataset is too small for the marker effect
+method. With larger datasets (e.g., hundreds of lines and thousands of
+markers), both methods run successfully and can be directly compared.
+
+In many cases the two methods yield similar accuracy for environment-level
+prediction (`RM.E`), but the marker effect approach may outperform the reaction
+norm model when predicting untested genotypes (`RM.G` or `RM.GE`), since it
+models marker-level heterogeneity in environmental sensitivity.
+
+## Forecasting New Environments
+
+The `forecast_next_year()` function provides a direct way to evaluate how well
+the model predicts performance in environments excluded from training. This
+simulates a practical breeding scenario where historical data from existing
+trial sites is used to predict outcomes at new locations or in future years.
+
+We use the first five sorghum environments as training and hold out the
+remaining environments as the test set:
+
+```{r forecast, cache = TRUE}
+train_envs <- env_mean_trait$env_code[1:5]
+test_envs  <- setdiff(env_mean_trait$env_code, train_envs)
+
+cat("Training environments:", paste(train_envs, collapse = ", "), "\n")
+cat("Test environments:    ", paste(test_envs, collapse = ", "), "\n")
+
+forecast_result <- forecast_next_year(
+  exp_trait      = exp_trait,
+  env_mean_trait = env_mean_trait,
+  trn_env        = train_envs
+)
+```
+
+Visualize the forecast results with `plot_prediction_result()`, which produces
+a four-panel display showing observed versus predicted values, prediction by
+environment, and the relationship with kPara:
+
+```{r plot-forecast, fig.width = 7, fig.height = 6}
+plot_prediction_result(
+  obs_prd        = forecast_result,
+  env_mean_trait = env_mean_trait,
+  trait          = "FTdap",
+  kpara_name     = best$param_name
+)
+```
+
+The top-left panel shows observed versus predicted trait values colored by
+environment. The top-right panel displays predictions against the environmental
+mean. The bottom panels show the relationship with the CERIS-identified
+environmental parameter. Points close to the diagonal indicate accurate
+predictions.
+
+## Choosing the Right Method
+
+The following table summarizes when to use each genomic prediction approach:
+
+| Scenario | Recommended Method | Rationale |
+|---|---|---|
+| Predict performance in a new environment (new location or year) | `jgra()` with `method = "RM.E"` | Environment LOO directly evaluates the target scenario. Reaction norm is efficient and interpretable. |
+| Predict untested genotypes in known environments | `jgra_marker()` with `method = "RM.G"` | Marker effects capture genotype-specific environmental sensitivity more accurately than a single breeding value. |
+| Predict untested genotypes in new environments | `jgra_marker()` with `method = "RM.GE"` | The most challenging scenario benefits from the richer marker-level model. |
+| Quick assessment with limited markers | `jgra()` with `method = "RM.E"` | The reaction norm approach is less sensitive to marker density and runs faster. |
+| Large marker panels with known QTL | `jgra_marker()` | Marker-specific effects can better leverage known causal variants. |
+
+For all methods, the prediction quality depends critically on the CERIS-derived
+kPara providing a meaningful environmental gradient. A strong CERIS result
+(high R-squared in the heatmap) translates directly into better genomic
+prediction accuracy.
+
+## Alternative GP Method: BayesB
+
+Both `jgra()` and `jgra_marker()` accept a `gp_method` parameter to switch
+between rrBLUP (default, ridge regression BLUP) and BayesB (Bayesian variable
+selection via BGLR). BayesB assigns marker-specific shrinkage, allowing some
+markers to have large effects while shrinking others to near zero --- useful
+when the trait architecture involves few large-effect QTL.
+
+To use BayesB, install the BGLR package and set `gp_method = "BayesB"`:
+
+```{r bayesb-example, eval = FALSE}
+# install.packages("BGLR")
+
+jgra_bayesb <- jgra(
+  pheno     = pheno,
+  geno      = geno_df,
+  envir     = envir,
+  enp       = "kPara",
+  env_meta  = d$env_meta,
+  method    = "RM.G",
+  gp_method = "BayesB",
+  nIter     = 5000,
+  burnIn    = 1000,
+  seed      = 42,
+  fold      = 5,
+  reshuffle = 2
+)
+jgra_bayesb$r_across
+```
+
+BayesB is computationally more expensive than rrBLUP due to MCMC sampling.
+For exploratory analyses, reduce `nIter` and `burnIn`. For publication-quality
+results, use `nIter >= 10000` and `burnIn >= 2000`.
+
+The `seed` parameter ensures reproducible results across runs --- this applies
+to both BayesB MCMC sampling and the random fold assignments used in
+cross-validation.
+
+The same `gp_method` and `seed` parameters are available in `cv_genotype()`
+and `cv_combined()`:
+
+```{r bayesb-cv, eval = FALSE}
+cv_result <- cv_genotype(
+  gFold = 5, gIteration = 2,
+  SNPs = SNPs, lm_ab_matrix = lm_ab,
+  env_mean_trait = env_mean_trait, exp_trait = exp_trait,
+  gp_method = "BayesB", nIter = 5000, burnIn = 1000, seed = 42
+)
+```
+
+---
+
+## Summary
+
+This vignette demonstrated the two JGRA approaches for genomic prediction in
+CERIS:
+
+- **Reaction norm** (`jgra()`): Models breeding values and their interaction
+  with kPara. Efficient, interpretable, and well-suited for environment-level
+  prediction.
+- **Marker effects** (`jgra_marker()`): Models individual marker sensitivities
+  to kPara. More flexible for genotype-level prediction.
+- **Forecasting** (`forecast_next_year()`): Evaluates prediction accuracy in a
+  practical train/test split scenario.
+
+Both approaches integrate the CERIS-identified critical environmental window,
+connecting the environmental search results directly to genomic prediction. For
+crops without genotype data, see `vignette("multi-crop-examples")` for
+alternative analysis strategies.

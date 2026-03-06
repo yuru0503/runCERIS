@@ -1,0 +1,225 @@
+---
+title: "CERIS Search"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{CERIS Search}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette demonstrates the core CERIS analysis: an exhaustive search over
+all developmental windows and environmental parameters to identify the critical
+period and factor driving GxE variation. We continue with the sorghum dataset.
+
+```{r load-data}
+library(runCERIS)
+
+sorghum <- load_crop_data("sorghum")
+traits     <- sorghum$traits
+env_meta   <- sorghum$env_meta
+env_params <- sorghum$env_params
+
+exp_trait      <- prepare_trait_data(traits, trait = "FTdap")
+env_mean_trait <- compute_env_means(exp_trait, env_meta)
+
+params <- c("DL", "GDD", "PTT", "PTR", "PTS")
+```
+
+## How the Exhaustive Window Search Works
+
+CERIS tests every possible contiguous window of days after planting (DAP). A
+window is defined by a start day (`Day_x`) and an end day (`Day_y`), where
+`Day_x <= Day_y`. For each window and each environmental parameter, the
+algorithm:
+
+1. Computes a summary statistic (e.g., cumulative sum or mean) of the
+   parameter within the window for every environment.
+2. Correlates that summary with the environmental trait mean across
+   environments.
+3. Records the Pearson correlation (`R`) and its p-value (`P`).
+
+This nested loop over all (start, end) pairs creates a triangular search space.
+The result is a complete map of how the trait--environment association changes
+with the developmental window, for every candidate parameter.
+
+## Running the Search
+
+`ceris_search()` performs the exhaustive search. The `max_days` argument limits
+the maximum DAP to consider, which controls both the search space and runtime.
+Setting `max_days = 80` is a good starting point for sorghum flowering time:
+
+```{r ceris-search, cache = TRUE}
+ceris_result <- ceris_search(
+  env_mean_trait,
+  env_params,
+  params   = params,
+  max_days = 80,
+  loo      = FALSE,
+  progress = NULL
+)
+```
+
+The `loo` parameter controls whether leave-one-out cross-validation is performed
+(see below). Setting `progress = NULL` suppresses the progress bar, which is
+appropriate for non-interactive use.
+
+## Understanding the Output
+
+The result is a data frame with one row per (Day_x, Day_y) combination:
+
+```{r result-structure}
+str(ceris_result)
+head(ceris_result)
+```
+
+The columns are:
+
+| Column | Description |
+|---|---|
+| `Day_x` | Start DAP of the window |
+| `Day_y` | End DAP of the window |
+| `window` | Window length (`Day_y - Day_x + 1`) |
+| `midXY` | Midpoint of the window |
+| `R_<param>` | Pearson correlation for each parameter |
+| `P_<param>` | P-value of the correlation for each parameter |
+
+For example, `R_GDD` is the correlation between cumulative GDD within the window
+and the trait environmental mean. High absolute correlations with low p-values
+indicate that the parameter during that window is a strong predictor of GxE.
+
+## Identifying the Best Window
+
+`ceris_identify_best()` scans the full search result and identifies the window
+and parameter with the strongest association. The `min_window` argument sets a
+minimum window length to avoid spuriously narrow windows:
+
+```{r identify-best}
+best <- ceris_identify_best(ceris_result, params = params, min_window = 7)
+best
+```
+
+The returned list contains the best parameter name, the start and end DAP of the
+optimal window, the correlation value, and the negative log p-value. This is the
+headline result of the CERIS analysis.
+
+## Visualizing the Search: Heatmap
+
+`plot_ceris_heatmap()` displays the full search result as a set of triangular
+heatmaps, one per parameter. The x-axis is the window start day, the y-axis is
+the window end day, and the color encodes the correlation strength:
+
+```{r plot-heatmap, fig.width = 8, fig.height = 6, cache = TRUE}
+plot_ceris_heatmap(ceris_result, params = params, max_days = 80)
+```
+
+Look for "hot spots" --- regions of consistently strong correlation. A well-
+defined hot spot indicates a robust critical window. Diffuse patterns suggest
+the association is spread across a broader developmental period.
+
+The plot also includes marginal traces showing how the best correlation varies
+with the window start and end days individually.
+
+## Computing Window Parameters
+
+Once you have identified the best window, use `compute_window_params()` to
+calculate the parameter summary for that window in each environment. This adds a
+`kPara` column to the environmental means data frame:
+
+```{r compute-window}
+env_mean_enriched <- compute_window_params(
+  env_mean_trait,
+  env_params,
+  dap_start = best$dap_start,
+  dap_end   = best$dap_end,
+  params    = best$param_name
+)
+head(env_mean_enriched)
+```
+
+The `kPara` column contains the computed value of the best parameter within the
+identified window for each environment. This is the environmental covariate that
+best predicts the trait variation.
+
+## Correlation Scatter Plot
+
+`plot_trait_env_param()` visualizes the relationship between the trait
+environmental mean and the windowed parameter:
+
+```{r plot-scatter, fig.width = 7, fig.height = 5}
+env_colors <- setNames(
+  scales::hue_pal()(nrow(env_mean_trait)),
+  env_mean_trait$env_code
+)
+
+plot_trait_env_param(
+  env_mean_enriched,
+  trait      = "FTdap",
+  kpara_name = best$param_name,
+  dap_start  = best$dap_start,
+  dap_end    = best$dap_end,
+  env_colors = env_colors
+)
+```
+
+A tight linear relationship confirms that the identified window and parameter
+capture the dominant environmental driver. Points that deviate from the trend
+may indicate environments where additional factors are at play.
+
+## Leave-One-Out Cross-Validation
+
+The standard CERIS search uses all environments to compute correlations. To
+assess robustness, you can enable leave-one-out (LOO) cross-validation by
+setting `loo = TRUE`. In LOO mode, each environment is held out in turn and the
+search is repeated on the remaining environments. This provides an honest
+estimate of predictive performance:
+
+```{r ceris-loo, cache = TRUE}
+ceris_loo <- ceris_search(
+  env_mean_trait,
+  env_params,
+  params   = params,
+  max_days = 80,
+  loo      = TRUE,
+  progress = NULL
+)
+```
+
+The LOO result has the same structure as the standard result. You can pass it
+to `ceris_identify_best()` and the visualization functions in the same way:
+
+```{r loo-best}
+best_loo <- ceris_identify_best(ceris_loo, params = params, min_window = 7)
+best_loo
+```
+
+If the LOO result agrees with the full-data result (same parameter, similar
+window), you can be confident that the finding is robust and not driven by a
+single outlier environment.
+
+```{r loo-heatmap, fig.width = 8, fig.height = 6, cache = TRUE}
+plot_ceris_heatmap(ceris_loo, params = params, max_days = 80)
+```
+
+## Summary
+
+The CERIS search workflow is:
+
+1. **Run `ceris_search()`** to compute correlations for all windows and
+   parameters.
+2. **Use `ceris_identify_best()`** to find the optimal window and parameter.
+3. **Visualize with `plot_ceris_heatmap()`** to inspect the full search
+   landscape.
+4. **Extract the window parameter with `compute_window_params()`** and plot the
+   trait--parameter relationship with `plot_trait_env_param()`.
+5. **Validate with LOO** (`loo = TRUE`) to confirm robustness.
+
+This systematic approach turns the complex GxE problem into an interpretable
+result: a specific environmental factor, during a specific developmental window,
+that explains why genotypes perform differently across environments.
