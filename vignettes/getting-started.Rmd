@@ -58,7 +58,7 @@ Install runCERIS from GitHub:
 
 ```r
 # install.packages("remotes")
-remotes::install_github("your-org/runCERIS")
+remotes::install_github("yuru0503/runCERIS")
 ```
 
 Once installed, load the package:

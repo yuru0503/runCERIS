@@ -24,18 +24,11 @@ genotype-by-environment interaction.
 
 ## Installation
 
-Install from a local source:
+Install from GitHub:
 
 ``` r
-# Install dependencies
-install.packages(c("ggplot2", "patchwork", "colorspace", "rrBLUP",
-                    "shiny", "pheatmap", "knitr", "rmarkdown"))
-
-# Install runCERIS
-install.packages("path/to/runCERIS", repos = NULL, type = "source")
-
-# Or with devtools
-devtools::install("path/to/runCERIS")
+# install.packages("remotes")
+remotes::install_github("yuru0503/runCERIS")
 ```
 
 ## Quick Start
