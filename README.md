@@ -22,9 +22,11 @@ accessible to the broader plant breeding community and to help users
 understand the quantitative genetics concepts underlying
 genotype-by-environment interaction.
 
-## Installation
+## Documentation
 
-Install from GitHub:
+Full tutorials and vignettes: **<https://yuru0503.github.io/runCERIS/>**
+
+## Installation
 
 ``` r
 # install.packages("remotes")
