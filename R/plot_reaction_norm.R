@@ -60,16 +60,28 @@ plot_reaction_norm <- function(exp_trait, env_mean_trait, trait = "Trait") {
     ggplot2::labs(x = "Environmental mean", y = trait, subtitle = "C") +
     ggplot2::theme_minimal(base_size = 10)
 
-  # Panel D: Fitted regression lines
+  # Panel D: Fitted regression lines (pre-computed per genotype)
+  line_codes <- unique(plot_df$line_code)
+  reg_df <- do.call(rbind, lapply(line_codes, function(l) {
+    ld <- plot_df[plot_df$line_code == l, ]
+    ld <- ld[!is.na(ld$Yobs), ]
+    if (nrow(ld) < 3) return(NULL)
+    fit <- lm(Yobs ~ meanY, data = ld)
+    data.frame(intercept = coef(fit)[1], slope = coef(fit)[2],
+               stringsAsFactors = FALSE)
+  }))
+
   p_d <- ggplot2::ggplot(plot_df,
-                         ggplot2::aes(x = .data$meanY, y = .data$Yobs,
-                                      group = .data$line_code)) +
+                         ggplot2::aes(x = .data$meanY, y = .data$Yobs)) +
     ggplot2::geom_point(alpha = 0.1, color = "grey50", size = 0.3) +
-    ggplot2::geom_smooth(method = "lm", formula = y ~ x, se = FALSE,
-                         alpha = 0.15, color = "grey50", linewidth = 0.3) +
+    ggplot2::geom_abline(
+      data = reg_df,
+      ggplot2::aes(intercept = .data$intercept, slope = .data$slope),
+      alpha = 0.1, color = "grey50", linewidth = 0.3
+    ) +
     ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed",
                          color = "black") +
-    ggplot2::labs(x = "Environmental mean", y = trait, subtitle = "D") +
+    ggplot2::labs(x = "Environmental variable", y = trait, subtitle = "D") +
     ggplot2::theme_minimal(base_size = 10)
 
   (p_a + p_b) / (p_c + p_d)

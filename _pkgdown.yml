@@ -24,6 +24,8 @@ navbar:
           href: articles/reaction-norms.html
         - text: "Joint Regression Analysis"
           href: articles/jra.html
+        - text: "JRA: Statistical Foundations"
+          href: articles/jra-theory.html
         - text: "Cross-Validation"
           href: articles/cross-validation.html
         - text: "Genomic Prediction (JGRA)"
