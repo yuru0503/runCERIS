@@ -222,7 +222,7 @@ environment $j$. This substitution has several advantages:
 
 ```{r ceris-vs-mean}
 params <- c("DL", "GDD", "PTT", "PTR", "PTS")
-ceris_result <- ceris_search(env_mean_trait, d$env_params, params, max_days = 80)
+ceris_result <- run_CERIS(env_mean_trait, d$env_params, params, max_days = 80)
 best <- ceris_identify_best(ceris_result, params = params)
 
 env_mean_trait <- compute_window_params(
@@ -254,7 +254,7 @@ A recommended workflow for JRA within the `runCERIS` framework:
 1. **Fit classical JRA** with `jra_model()` to establish a baseline.
 2. **Inspect $R^2$ distribution** --- if median $R^2 > 0.7$, the linear model
    is adequate; otherwise consider non-linear alternatives.
-3. **Run CERIS search** with `ceris_search()` to identify the best
+3. **Run CERIS search** with `run_CERIS()` to identify the best
    environmental parameter and developmental window.
 4. **Re-fit with kPara** using `slope_intercept(type = "both")` to compare
    the covariate-based regression against the mean-based baseline.

@@ -79,9 +79,9 @@ plot_reaction_norm <- function(exp_trait, env_mean_trait, trait = "Trait") {
       ggplot2::aes(intercept = .data$intercept, slope = .data$slope),
       alpha = 0.1, color = "grey50", linewidth = 0.3
     ) +
-    ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed",
+    ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "solid",
                          color = "black") +
-    ggplot2::labs(x = "Environmental variable", y = trait, subtitle = "D") +
+    ggplot2::labs(x = "Environmental mean", y = trait, subtitle = "D") +
     ggplot2::theme_minimal(base_size = 10)
 
   (p_a + p_b) / (p_c + p_d)

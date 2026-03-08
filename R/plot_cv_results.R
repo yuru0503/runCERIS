@@ -33,7 +33,7 @@ plot_cv_results <- function(cv_results,
     p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$Yprd, y = .data$Yobs,
                                            color = .data$env_code)) +
       ggplot2::geom_point(size = 1, alpha = 0.6) +
-      ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+      ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "solid") +
       ggplot2::coord_cartesian(xlim = xy_lim, ylim = xy_lim) +
       ggplot2::annotate("text",
                         x = xy_lim[1] + diff(xy_lim) * 0.5,

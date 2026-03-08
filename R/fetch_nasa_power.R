@@ -7,7 +7,7 @@
 #' photothermal day variants (PTD1, PTD2), and photothermal sum (PTS).
 #'
 #' The returned data frame has the same structure as \code{env_params} and
-#' can be used directly in \code{\link{ceris_search}}.
+#' can be used directly in \code{\link{run_CERIS}}.
 #'
 #' @param env_meta Data frame with at least \code{env_code}, \code{lat},
 #'   \code{lon}, and \code{PlantingDate} columns. \code{PlantingDate} should
@@ -51,7 +51,7 @@
 #' # Use in CERIS search
 #' exp_trait <- prepare_trait_data(d$traits, "FTdap")
 #' env_mean_trait <- compute_env_means(exp_trait, d$env_meta)
-#' ceris_result <- ceris_search(
+#' ceris_result <- run_CERIS(
 #'   env_mean_trait, env_params,
 #'   params = c("DL", "GDD", "PTT", "PTR", "PTS"),
 #'   max_days = 80

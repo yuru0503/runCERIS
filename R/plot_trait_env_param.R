@@ -35,7 +35,7 @@ plot_trait_env_param <- function(env_mean_trait, trait = "Trait",
                        ggplot2::aes(x = .data$kPara, y = .data$meanY)) +
     ggplot2::geom_point(ggplot2::aes(color = .data$env_code), size = 3) +
     ggplot2::geom_smooth(method = "lm", formula = y ~ x, se = FALSE,
-                         linetype = "dashed", color = "black", linewidth = 0.5) +
+                         linetype = "solid", color = "black", linewidth = 0.5) +
     ggplot2::annotate("text", x = mean(env_mean_trait$kPara),
                       y = min(env_mean_trait$meanY),
                       label = paste0("r = ", r_val), size = 4) +
