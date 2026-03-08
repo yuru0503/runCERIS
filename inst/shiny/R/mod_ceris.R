@@ -46,7 +46,7 @@ mod_ceris_server <- function(id, shared) {
         } else {
           median
         }
-        shared$ceris_result <- ceris_search(
+        shared$ceris_result <- run_CERIS(
           shared$env_mean_trait, shared$env_params, shared$params,
           max_days = max_dap, loo = input$loo, loo_summary = loo_fn,
           progress = function(frac) setProgress(frac)

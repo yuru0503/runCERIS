@@ -23,10 +23,10 @@
 #' exp_trait <- prepare_trait_data(d$traits, "FTdap")
 #' env_mean_trait <- compute_env_means(exp_trait, d$env_meta)
 #' params <- c("DL", "GDD", "PTT", "PTR", "PTS")
-#' result <- ceris_search(env_mean_trait, d$env_params, params, max_days = 80)
+#' result <- run_CERIS(env_mean_trait, d$env_params, params, max_days = 80)
 #' head(result)
 #' }
-ceris_search <- function(env_mean_trait, env_params, params,
+run_CERIS <- function(env_mean_trait, env_params, params,
                          max_days = NULL, loo = FALSE,
                          loo_summary = median, progress = NULL) {
   if (is.null(max_days)) max_days <- max(env_params$DAP)

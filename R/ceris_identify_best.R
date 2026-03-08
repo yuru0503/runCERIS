@@ -3,7 +3,7 @@
 #' Finds the window and parameter with the maximum absolute correlation
 #' from a CERIS search result.
 #'
-#' @param ceris_result Data.frame from \code{ceris_search}
+#' @param ceris_result Data.frame from \code{run_CERIS}
 #' @param params Character vector of parameter names
 #' @param min_window Minimum window size in days (default 7)
 #' @return A list with components:
@@ -19,7 +19,7 @@
 #' exp_trait <- prepare_trait_data(d$traits, "FTdap")
 #' env_mean_trait <- compute_env_means(exp_trait, d$env_meta)
 #' params <- c("DL", "GDD", "PTT", "PTR", "PTS")
-#' result <- ceris_search(env_mean_trait, d$env_params, params, max_days = 80)
+#' result <- run_CERIS(env_mean_trait, d$env_params, params, max_days = 80)
 #' best <- ceris_identify_best(result, params)
 #' best$param_name
 #' best$dap_start

@@ -75,7 +75,7 @@ CERIS provides functions organized into four categories:
 |---|---|---|
 | **Data Loading** | `load_crop_data()`, `validate_input_data()` | Load built-in datasets and validate custom data |
 | **Data Preparation** | `prepare_trait_data()`, `compute_env_means()`, `prepare_line_by_env()` | Transform raw trial data into analysis-ready formats |
-| **CERIS Search** | `ceris_search()`, `ceris_identify_best()`, `compute_window_params()` | Run the exhaustive window search and extract results |
+| **CERIS Search** | `run_CERIS()`, `ceris_identify_best()`, `compute_window_params()` | Run the exhaustive window search and extract results |
 | **Visualization** | `plot_ceris_heatmap()`, `plot_trait_env_param()`, `plot_geo_order()`, `plot_env_means()`, `plot_env_factors()`, `plot_pca_biplot()`, `plot_clustering_heatmap()` | Explore data and interpret search results |
 
 ## Built-in Datasets

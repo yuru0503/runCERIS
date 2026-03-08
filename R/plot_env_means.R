@@ -21,7 +21,7 @@ plot_env_means <- function(exp_trait, env_mean_trait, trait = "Trait") {
     ggplot2::geom_line(ggplot2::aes(group = .data$line_code),
                        alpha = 0.1, color = "grey50", linewidth = 0.3) +
     ggplot2::geom_point(alpha = 0.1, color = "grey50", size = 0.5) +
-    ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed",
+    ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "solid",
                          color = "grey") +
     ggplot2::geom_point(
       data = env_mean_trait,

@@ -20,7 +20,7 @@ R/                          # Package source
 ├── data.R                  # Roxygen documentation for 4 crop datasets (sorghum/maize/rice/oat)
 ├── compile_envirome.R      # Compile per-environment daily climate files into unified data.frame
 ├── fetch_nasa_power.R      # Retrieve daily meteorological records via NASA POWER API
-├── ceris_search.R          # Core CERIS: exhaustive pairwise DAP window scan, Pearson r + -log10(P)
+├── run_CERIS.R          # Core CERIS: exhaustive pairwise DAP window scan, Pearson r + -log10(P)
 ├── ceris_identify_best.R   # Extract optimal window and parameter from CERIS output
 ├── ceris_loo_cor.R         # Leave-one-environment-out correlation for CERIS (median/mean summary)
 ├── jra_model.R             # Finlay–Wilkinson Joint Regression (per-genotype slope & intercept on env mean)
@@ -63,7 +63,7 @@ docs/                       # pkgdown site (GitHub Pages deployment)
 
 ## Key Patterns
 
-- **Analytical pipeline**: `load_crop_data()` → `prepare_trait_data()` → `compute_env_means()` → `compute_window_params()` → analysis (`ceris_search`, `jra_model`, `jgra`, `loocv`, `cv_*`) → `plot_*()` visualization
+- **Analytical pipeline**: `load_crop_data()` → `prepare_trait_data()` → `compute_env_means()` → `compute_window_params()` → analysis (`run_CERIS`, `jra_model`, `jgra`, `loocv`, `cv_*`) → `plot_*()` visualization
 - **Canonical column names**: `line_code` (genotype ID), `env_code` (environment ID), `Yobs` (observed phenotype), `meanY` (environment mean ȳ_j), `kPara` (best environmental covariate), `DAP` (days after planting)
 - **CERIS algorithm**: O(n²) exhaustive scan over all (DAP_start, DAP_end) pairs where window ≥ 7 days; computes Pearson *r* and −log₁₀(*P*) between window-aggregated covariate and ȳ_j for each environmental parameter
 - **Reaction norm model**: y_ij = α_i + β_i × h_j + ε_ij, where h_j is the environmental covariate (either ȳ_j for JRA or kPara for CERIS-informed regression)
@@ -102,6 +102,6 @@ run_app()                        # Launch Shiny GUI
 # Typical scripted workflow
 exp_trait <- prepare_trait_data(d$traits, "FTdap")
 env_mean  <- compute_env_means(exp_trait, d$env_meta)
-result    <- ceris_search(env_mean, d$env_params, c("DL","GDD","PTT","PTR","PTS"))
+result    <- run_CERIS(env_mean, d$env_params, c("DL","GDD","PTT","PTR","PTS"))
 best      <- ceris_identify_best(result)
 ```

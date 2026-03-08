@@ -51,7 +51,7 @@ reference:
   - title: "CERIS Search"
     desc: "Exhaustive search for critical environmental windows"
     contents:
-      - ceris_search
+      - run_CERIS
       - ceris_loo_cor
       - ceris_identify_best
       - compute_window_params

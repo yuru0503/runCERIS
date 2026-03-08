@@ -59,7 +59,7 @@ head(env_mean_trait)
 ``` r
 # Run CERIS search (use max_days = 80 for speed)
 params <- c("DL", "GDD", "PTT", "PTR", "PTS")
-ceris_result <- ceris_search(env_mean_trait, d$env_params, params, max_days = 80)
+ceris_result <- run_CERIS(env_mean_trait, d$env_params, params, max_days = 80)
 
 # Find the best environmental window
 best <- ceris_identify_best(ceris_result, params)
@@ -75,7 +75,7 @@ cat(sprintf("Best parameter: %s (DAP %d-%d, r = %.3f)\n",
 | 1    | `load_crop_data()`           | Load built-in dataset    |
 | 2    | `prepare_trait_data()`       | Average replicates       |
 | 3    | `compute_env_means()`        | Environmental means      |
-| 4    | `ceris_search()`             | Exhaustive window search |
+| 4    | `run_CERIS()`             | Exhaustive window search |
 | 5    | `ceris_identify_best()`      | Find best window         |
 | 6    | `slope_intercept()`          | Reaction norm parameters |
 | 7    | `jra_model()`                | Joint regression         |

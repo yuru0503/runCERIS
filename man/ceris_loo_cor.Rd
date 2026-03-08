@@ -31,7 +31,7 @@ remaining environments. The per-fold values are then summarised across folds
 using a user-chosen function (default: \code{median}).
 }
 \details{
-This function is used internally by \code{\link{ceris_search}} when
+This function is used internally by \code{\link{run_CERIS}} when
 \code{loo = TRUE}, but can also be called directly to evaluate a specific
 trait--parameter combination without running the full exhaustive search.
 }

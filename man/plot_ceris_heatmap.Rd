@@ -7,7 +7,7 @@
 plot_ceris_heatmap(ceris_result, params, max_days)
 }
 \arguments{
-\item{ceris_result}{Data.frame from \code{ceris_search}}
+\item{ceris_result}{Data.frame from \code{run_CERIS}}
 
 \item{params}{Character vector of parameter names}
 
@@ -27,7 +27,7 @@ d <- load_crop_data("sorghum")
 exp_trait <- prepare_trait_data(d$traits, "FTdap")
 env_mean_trait <- compute_env_means(exp_trait, d$env_meta)
 params <- c("DL", "GDD", "PTT", "PTR", "PTS")
-result <- ceris_search(env_mean_trait, d$env_params, params, max_days = 80)
+result <- run_CERIS(env_mean_trait, d$env_params, params, max_days = 80)
 plot_ceris_heatmap(result, params, max_days = 80)
 }
 }
