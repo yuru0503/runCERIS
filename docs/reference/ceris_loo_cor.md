@@ -53,10 +53,9 @@ A list with components:
 
 ## Details
 
-This function is used internally by [`ceris_search`](ceris_search.md)
-when `loo = TRUE`, but can also be called directly to evaluate a
-specific trait–parameter combination without running the full exhaustive
-search.
+This function is used internally by [`run_CERIS`](run_CERIS.md) when
+`loo = TRUE`, but can also be called directly to evaluate a specific
+trait–parameter combination without running the full exhaustive search.
 
 ## Examples
 

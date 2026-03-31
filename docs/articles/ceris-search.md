@@ -40,14 +40,14 @@ parameter.
 
 ## Running the Search
 
-[`ceris_search()`](../reference/ceris_search.md) performs the exhaustive
+[`run_CERIS()`](../reference/run_CERIS.md) performs the exhaustive
 search. The `max_days` argument limits the maximum DAP to consider,
 which controls both the search space and runtime. Setting
 `max_days = 80` is a good starting point for sorghum flowering time:
 
 ``` r
 
-ceris_result <- ceris_search(
+ceris_result <- run_CERIS(
   env_mean_trait,
   env_params,
   params   = params,
@@ -247,7 +247,7 @@ performance:
 
 ``` r
 
-ceris_loo <- ceris_search(
+ceris_loo <- run_CERIS(
   env_mean_trait,
   env_params,
   params   = params,
@@ -297,7 +297,7 @@ plot_ceris_heatmap(ceris_loo, params = params, max_days = 80)
 
 The CERIS search workflow is:
 
-1.  **Run [`ceris_search()`](../reference/ceris_search.md)** to compute
+1.  **Run [`run_CERIS()`](../reference/run_CERIS.md)** to compute
     correlations for all windows and parameters.
 2.  **Use
     [`ceris_identify_best()`](../reference/ceris_identify_best.md)** to

@@ -1,5 +1,6 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>/404.html</loc></url>
+<url><loc>/CLAUDE.html</loc></url>
 <url><loc>/LICENSE-text.html</loc></url>
 <url><loc>/articles/ceris-search.html</loc></url>
 <url><loc>/articles/cross-validation.html</loc></url>
@@ -8,6 +9,7 @@
 <url><loc>/articles/genomic-prediction.html</loc></url>
 <url><loc>/articles/getting-started.html</loc></url>
 <url><loc>/articles/index.html</loc></url>
+<url><loc>/articles/jra-theory.html</loc></url>
 <url><loc>/articles/jra.html</loc></url>
 <url><loc>/articles/multi-crop-examples.html</loc></url>
 <url><loc>/articles/reaction-norms.html</loc></url>
@@ -67,6 +69,7 @@
 <url><loc>/reference/rice_genotype.html</loc></url>
 <url><loc>/reference/rice_traits.html</loc></url>
 <url><loc>/reference/runCERIS-package.html</loc></url>
+<url><loc>/reference/run_CERIS.html</loc></url>
 <url><loc>/reference/run_app.html</loc></url>
 <url><loc>/reference/slope_intercept.html</loc></url>
 <url><loc>/reference/solve_gp.html</loc></url>

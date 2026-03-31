@@ -171,9 +171,8 @@ interactions (Tibbs-Cortes et al. 2024):
 | H2O.balance | PET - PRECIP                      | Temperature x Moisture   |
 
 Not all parameters need to be present. You choose which parameters to
-search over when calling
-[`ceris_search()`](../reference/ceris_search.md). The built-in datasets
-include:
+search over when calling [`run_CERIS()`](../reference/run_CERIS.md). The
+built-in datasets include:
 
 | Crop    | Parameters                                     |
 |---------|------------------------------------------------|
@@ -425,8 +424,8 @@ date for each environment:
 env_params <- fetch_nasa_power(d$env_meta, max_dap = 120, base_temp = 10)
 head(env_params)
 
-# The result is ready to use in ceris_search()
-ceris_result <- ceris_search(
+# The result is ready to use in run_CERIS()
+ceris_result <- run_CERIS(
   env_mean_trait, env_params,
   params = c("DL", "GDD", "PTT", "PTR", "PTS"),
   max_days = 80

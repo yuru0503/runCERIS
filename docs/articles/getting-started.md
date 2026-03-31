@@ -49,7 +49,7 @@ Install runCERIS from GitHub:
 ``` r
 
 # install.packages("remotes")
-remotes::install_github("your-org/runCERIS")
+remotes::install_github("yuru0503/runCERIS")
 ```
 
 Once installed, load the package:
@@ -67,7 +67,7 @@ CERIS provides functions organized into four categories:
 |----|----|----|
 | **Data Loading** | [`load_crop_data()`](../reference/load_crop_data.md), [`validate_input_data()`](../reference/validate_input_data.md) | Load built-in datasets and validate custom data |
 | **Data Preparation** | [`prepare_trait_data()`](../reference/prepare_trait_data.md), [`compute_env_means()`](../reference/compute_env_means.md), [`prepare_line_by_env()`](../reference/prepare_line_by_env.md) | Transform raw trial data into analysis-ready formats |
-| **CERIS Search** | [`ceris_search()`](../reference/ceris_search.md), [`ceris_identify_best()`](../reference/ceris_identify_best.md), [`compute_window_params()`](../reference/compute_window_params.md) | Run the exhaustive window search and extract results |
+| **CERIS Search** | [`run_CERIS()`](../reference/run_CERIS.md), [`ceris_identify_best()`](../reference/ceris_identify_best.md), [`compute_window_params()`](../reference/compute_window_params.md) | Run the exhaustive window search and extract results |
 | **Visualization** | [`plot_ceris_heatmap()`](../reference/plot_ceris_heatmap.md), [`plot_trait_env_param()`](../reference/plot_trait_env_param.md), [`plot_geo_order()`](../reference/plot_geo_order.md), [`plot_env_means()`](../reference/plot_env_means.md), [`plot_env_factors()`](../reference/plot_env_factors.md), [`plot_pca_biplot()`](../reference/plot_pca_biplot.md), [`plot_clustering_heatmap()`](../reference/plot_clustering_heatmap.md) | Explore data and interpret search results |
 
 ## Built-in Datasets
@@ -313,47 +313,3 @@ A typical CERIS analysis proceeds in three stages:
     extensions).
 
 The next vignette walks through data exploration step by step.
-
-## References
-
-The CERIS-JGRA framework and the analyses implemented in this package
-are based on the following publications from Dr. Jianming Yu’s lab at
-Iowa State University:
-
-1.  **Li, X.**, Guo, T., Mu, Q., Li, X., & Yu, J. (2018). Genomic and
-    environmental determinants and their interplay underlying phenotypic
-    plasticity. *Proceedings of the National Academy of Sciences*,
-    115(26), 6679–6684.
-    [doi:10.1073/pnas.1718326115](https://doi.org/10.1073/pnas.1718326115)
-
-2.  **Li, X.**, Guo, T., Wang, J., Bekele, W. A., Sukumaran, S., …, &
-    Yu, J. (2021). An integrated framework reinstating the environmental
-    dimension for GWAS and genomic selection in crops. *Molecular
-    Plant*, 14(6), 874–887.
-    [doi:10.1016/j.molp.2021.03.010](https://doi.org/10.1016/j.molp.2021.03.010)
-
-3.  **Guo, T.**, Wei, J., Li, X., & Yu, J. (2024). Environmental context
-    of phenotypic plasticity in flowering time in sorghum and rice.
-    *Journal of Experimental Botany*, 75(3), 1004–1015.
-    [doi:10.1093/jxb/erad398](https://doi.org/10.1093/jxb/erad398)
-
-4.  **Wei, J.**, Guo, T., Mu, Q., Alladassi, B. M. E., …, & Yu, J.
-    (2025). Genetic and environmental patterns underlying phenotypic
-    plasticity in flowering time and plant height in sorghum. *Plant,
-    Cell & Environment*, 48(4), 1994–2009.
-    [doi:10.1111/pce.15213](https://doi.org/10.1111/pce.15213)
-
-5.  **Tibbs-Cortes, L. E.**, Guo, T., Li, X., & Yu, J. (2024).
-    Comprehensive identification of genomic and environmental
-    determinants of phenotypic plasticity in maize. *Genome Research*,
-    34(8), 1253–1265.
-    [doi:10.1101/gr.279131.124](https://doi.org/10.1101/gr.279131.124)
-
-6.  **Kusmec, A.**, Yeh, C.-T., Schnable, P. S., …, & Yu, J. (2024).
-    Data-driven identification of environmental variables influencing
-    phenotypic plasticity to facilitate breeding for future climates.
-    *New Phytologist*, 244(2), 618–634.
-    [doi:10.1111/nph.19937](https://doi.org/10.1111/nph.19937)
-
-The original CERIS-JGRA code is available at
-[github.com/jmyu/CERIS_JGRA](https://github.com/jmyu/CERIS_JGRA).

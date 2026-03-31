@@ -13,7 +13,7 @@ ceris_identify_best(ceris_result, params, min_window = 7)
 
 - ceris_result:
 
-  Data.frame from `ceris_search`
+  Data.frame from `run_CERIS`
 
 - params:
 
@@ -55,7 +55,7 @@ d <- load_crop_data("sorghum")
 exp_trait <- prepare_trait_data(d$traits, "FTdap")
 env_mean_trait <- compute_env_means(exp_trait, d$env_meta)
 params <- c("DL", "GDD", "PTT", "PTR", "PTS")
-result <- ceris_search(env_mean_trait, d$env_params, params, max_days = 80)
+result <- run_CERIS(env_mean_trait, d$env_params, params, max_days = 80)
 best <- ceris_identify_best(result, params)
 best$param_name
 #> [1] "PTS"

@@ -39,6 +39,7 @@
     <li><a class="dropdown-item" href="../articles/ceris-search.html">CERIS Search</a></li>
     <li><a class="dropdown-item" href="../articles/reaction-norms.html">Reaction Norms &amp; Slope-Intercept</a></li>
     <li><a class="dropdown-item" href="../articles/jra.html">Joint Regression Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/jra-theory.html">JRA: Statistical Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/cross-validation.html">Cross-Validation</a></li>
     <li><a class="dropdown-item" href="../articles/genomic-prediction.html">Genomic Prediction (JGRA)</a></li>
     <li><a class="dropdown-item" href="../articles/multi-crop-examples.html">Multi-Crop Examples</a></li>
@@ -81,9 +82,54 @@ Originally proposed by Finlay and Wilkinson (1963) and refined by
 Eberhart and Russell (1966), JRA regresses each genotype’s performance
 on the environmental mean. The resulting slope and intercept summarize
 how each genotype responds to environmental quality.</p>
+<div class="section level3">
+<h3 id="statistical-model">Statistical Model<a class="anchor" aria-label="anchor" href="#statistical-model"></a>
+</h3>
+<p>The observed phenotype of genotype
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+in environment
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+is modeled as:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>α</mi><mi>i</mi></msub><mo>+</mo><msub><mi>β</mi><mi>i</mi></msub><mspace width="0.167em"></mspace><msub><mover><mi>y</mi><mo accent="true">‾</mo></mover><mi>j</mi></msub><mo>+</mo><msub><mi>ε</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">y_{ij} = \alpha_i + \beta_i \, \bar{y}_j + \varepsilon_{ij}</annotation></semantics></math></p>
+<p>where:</p>
+<ul>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">y_{ij}</annotation></semantics></math>
+is the observed trait value of genotype
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+in environment
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>α</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\alpha_i</annotation></semantics></math>
+is the intercept (baseline performance) of genotype
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\beta_i</annotation></semantics></math>
+is the regression slope (sensitivity) of genotype
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>y</mi><mo accent="true">‾</mo></mover><mi>j</mi></msub><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup><msub><mi>y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\bar{y}_j = \frac{1}{n} \sum_{i=1}^{n} y_{ij}</annotation></semantics></math>
+is the environmental mean (environmental index)</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ε</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">\varepsilon_{ij}</annotation></semantics></math>
+is the residual error</li>
+</ul>
+<p>The environmental index
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>y</mi><mo accent="true">‾</mo></mover><mi>j</mi></msub><annotation encoding="application/x-tex">\bar{y}_j</annotation></semantics></math>
+serves as a proxy for overall environmental quality — higher values
+indicate more favorable growing conditions. Each genotype’s slope
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\beta_i</annotation></semantics></math>
+quantifies its responsiveness to environmental variation, while the
+intercept
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>α</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\alpha_i</annotation></semantics></math>
+reflects its general performance level.</p>
 <p>CERIS implements JRA through the <code><a href="../reference/jra_model.html">jra_model()</a></code> function.
 This vignette demonstrates how to fit the model, visualize the results,
 and interpret the output.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="data-setup">Data Setup<a class="anchor" aria-label="anchor" href="#data-setup"></a>

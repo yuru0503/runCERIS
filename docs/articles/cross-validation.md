@@ -39,7 +39,7 @@ parameters:
 
 ``` r
 
-ceris_result <- ceris_search(
+ceris_result <- run_CERIS(
   env_mean_trait = env_mean_trait,
   env_params     = d$env_params,
   params         = c("DL", "GDD", "PTT", "PTR", "PTS"),

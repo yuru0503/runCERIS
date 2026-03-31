@@ -82,11 +82,11 @@ cv_result <- cv_combined(gFold = 5, gIteration = 2, SNPs = SNPs,
                          env_mean_trait = env_mean_trait, exp_trait = exp_trait)
 head(cv_result)
 #>   line_code env_code   Yprd    Yobs Rep
-#> 1      E102     PR12 58.611 56.5722   1
-#> 2      E103     PR12 55.364 53.8861   1
-#> 3      E106     PR12 53.217 57.3396   1
-#> 4      E107     PR12 52.402 58.1071   1
-#> 5      E108     PR12 55.731 60.0257   1
-#> 6      E114     PR12 54.083 54.6536   1
+#> 1      E102     PR12 59.167 56.5722   1
+#> 2      E103     PR12 55.656 53.8861   1
+#> 3      E106     PR12 53.806 57.3396   1
+#> 4      E107     PR12 53.247 58.1071   1
+#> 5      E108     PR12 56.082 60.0257   1
+#> 6      E114     PR12 54.303 54.6536   1
 # }
 ```

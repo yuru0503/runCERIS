@@ -39,6 +39,7 @@
     <li><a class="dropdown-item" href="../articles/ceris-search.html">CERIS Search</a></li>
     <li><a class="dropdown-item" href="../articles/reaction-norms.html">Reaction Norms &amp; Slope-Intercept</a></li>
     <li><a class="dropdown-item" href="../articles/jra.html">Joint Regression Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/jra-theory.html">JRA: Statistical Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/cross-validation.html">Cross-Validation</a></li>
     <li><a class="dropdown-item" href="../articles/genomic-prediction.html">Genomic Prediction (JGRA)</a></li>
     <li><a class="dropdown-item" href="../articles/multi-crop-examples.html">Multi-Crop Examples</a></li>
@@ -127,7 +128,7 @@ environment metadata:</p>
 environmental window. We set <code>max_days = 80</code> to keep
 computation manageable:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ceris_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ceris_search.html">ceris_search</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">ceris_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_CERIS.html">run_CERIS</a></span><span class="op">(</span></span>
 <span>  env_mean_trait <span class="op">=</span> <span class="va">env_mean_trait</span>,</span>
 <span>  env_params     <span class="op">=</span> <span class="va">d</span><span class="op">$</span><span class="va">env_params</span>,</span>
 <span>  params         <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DL"</span>, <span class="st">"GDD"</span>, <span class="st">"PTT"</span>, <span class="st">"PTR"</span>, <span class="st">"PTS"</span><span class="op">)</span>,</span>

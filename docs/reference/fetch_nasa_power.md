@@ -43,7 +43,7 @@ A data frame with columns: `env_code`, `DAP`, `TMAX`, `TMIN`, `DL`,
 ## Details
 
 The returned data frame has the same structure as `env_params` and can
-be used directly in [`ceris_search`](ceris_search.md).
+be used directly in [`run_CERIS`](run_CERIS.md).
 
 The function calls the NASA POWER daily API
 (<https://power.larc.nasa.gov>) to retrieve `T2M_MAX` (daily maximum
@@ -92,7 +92,7 @@ head(env_params)
 # Use in CERIS search
 exp_trait <- prepare_trait_data(d$traits, "FTdap")
 env_mean_trait <- compute_env_means(exp_trait, d$env_meta)
-ceris_result <- ceris_search(
+ceris_result <- run_CERIS(
   env_mean_trait, env_params,
   params = c("DL", "GDD", "PTT", "PTR", "PTS"),
   max_days = 80

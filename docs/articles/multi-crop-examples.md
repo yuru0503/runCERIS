@@ -122,7 +122,7 @@ computationally intensive than sorghum’s 7 environments:
 
 maize_params <- c("TMAX", "TMIN", "DL", "GDD", "PTT", "PTR", "PTS")
 
-maize_ceris <- ceris_search(
+maize_ceris <- run_CERIS(
   env_mean_trait = maize_env,
   env_params     = maize$env_params,
   params         = maize_params,
@@ -3089,7 +3089,7 @@ rice_env
 
 rice_params <- c("TMAX", "TMIN", "DL", "GDD", "PTT", "PTR", "PTS")
 
-rice_ceris <- ceris_search(
+rice_ceris <- run_CERIS(
   env_mean_trait = rice_env,
   env_params     = rice$env_params,
   params         = rice_params,
@@ -3267,7 +3267,7 @@ photoperiod-temperature interaction:
 
 oat_params <- c("TMAX", "TMIN", "DL", "GDD", "PTT", "PTR", "PTD1", "PTD2", "PTS")
 
-oat_ceris <- ceris_search(
+oat_ceris <- run_CERIS(
   env_mean_trait = oat_env,
   env_params     = oat$env_params,
   params         = oat_params,

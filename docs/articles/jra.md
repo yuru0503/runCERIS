@@ -9,6 +9,31 @@ Russell (1966), JRA regresses each genotype’s performance on the
 environmental mean. The resulting slope and intercept summarize how each
 genotype responds to environmental quality.
 
+### Statistical Model
+
+The observed phenotype of genotype $`i`$ in environment $`j`$ is modeled
+as:
+
+``` math
+y_{ij} = \alpha_i + \beta_i \, \bar{y}_j + \varepsilon_{ij}
+```
+
+where:
+
+- $`y_{ij}`$ is the observed trait value of genotype $`i`$ in
+  environment $`j`$
+- $`\alpha_i`$ is the intercept (baseline performance) of genotype $`i`$
+- $`\beta_i`$ is the regression slope (sensitivity) of genotype $`i`$
+- $`\bar{y}_j = \frac{1}{n} \sum_{i=1}^{n} y_{ij}`$ is the environmental
+  mean (environmental index)
+- $`\varepsilon_{ij}`$ is the residual error
+
+The environmental index $`\bar{y}_j`$ serves as a proxy for overall
+environmental quality — higher values indicate more favorable growing
+conditions. Each genotype’s slope $`\beta_i`$ quantifies its
+responsiveness to environmental variation, while the intercept
+$`\alpha_i`$ reflects its general performance level.
+
 CERIS implements JRA through the
 [`jra_model()`](../reference/jra_model.md) function. This vignette
 demonstrates how to fit the model, visualize the results, and interpret

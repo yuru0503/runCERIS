@@ -24,8 +24,8 @@ Load built-in datasets and prepare data for analysis
 
 Exhaustive search for critical environmental windows
 
-- [`ceris_search()`](ceris_search.md) : CERIS Exhaustive Search for
-  Critical Environmental Windows
+- [`run_CERIS()`](run_CERIS.md) : CERIS Exhaustive Search for Critical
+  Environmental Windows
 - [`ceris_loo_cor()`](ceris_loo_cor.md) : Leave-One-Out Cross-Validated
   Correlation
 - [`ceris_identify_best()`](ceris_identify_best.md) : Identify the Best
